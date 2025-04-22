@@ -33,3 +33,8 @@ We're planning to build the Utopia ERP system in a modular and scalable way, usi
 | **Firebase CLI**             | One-line deployment to Firebase                              |
 | **Git + GitHub**             | Version control & team collaboration                         |
 
+## 🛠️ Future Plan
+- 🔄 Integrate n8n for workflow automation
+- 🔐 Role-based permission with Firestore
+- 📦 Modularize Chat System / Form Tools
+
