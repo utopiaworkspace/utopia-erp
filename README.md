@@ -1,4 +1,4 @@
-# 🌟 Utopia ERP System
+# 🌟 Utopia ERP System (AI-Driven)
 
 ## 🧩 System Modules
 
