@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./SignIn/SignIn";
-import Appe from "./Appe"; // Import the Toolpad dashboard wrapper
+import Appe from "./App"; // Import the Toolpad dashboard wrapper
 import HomePage from "./Pages/ClaimPage"; // Import HomePage if needed
 import ProtectedRoute from "./ProtectedRoutes";
 import Layout from "./Layout/Dashboard"; // Import your layout component

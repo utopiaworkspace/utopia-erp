@@ -108,15 +108,15 @@ export default function MyProfile() {
         <Typography variant="h6">User Information</Typography>
         <TextField
           label="Full Name"
-          name="fullname"
-          value={userData?.fullname || ''}
+          name="fullName"
+          value={userData?.fullName || ''}
           onChange={handleUserChange}
           fullWidth
         />
         <TextField
           label="Short Name"
-          name="shortname"
-          value={userData?.shortname || ''}
+          name="shortName"
+          value={userData?.shortName || ''}
           onChange={handleUserChange}
           fullWidth
         />
@@ -130,15 +130,15 @@ export default function MyProfile() {
         />
         <TextField
           label="IC"
-          name="ic"
-          value={userData?.ic || ''}
+          name="icNum"
+          value={userData?.icNum || ''}
           onChange={handleUserChange}
           fullWidth
         />
         <TextField
           label="Phone Number"
-          name="phonenum"
-          value={userData?.phonenum || ''}
+          name="phoneNum"
+          value={userData?.phoneNum || ''}
           onChange={handleUserChange}
           fullWidth
         />
@@ -147,22 +147,22 @@ export default function MyProfile() {
         <Typography variant="h6">Bank Information</Typography>
         <TextField
           label="Bank Holder"
-          name="bankholder"
-          value={bankInfo?.bankholder || ''}
+          name="bankHolder"
+          value={bankInfo?.bankHolder || ''}
           onChange={handleBankChange}
           fullWidth
         />
         <TextField
           label="Bank Name"
-          name="bankname"
-          value={bankInfo?.bankname || ''}
+          name="bankName"
+          value={bankInfo?.bankName || ''}
           onChange={handleBankChange}
           fullWidth
         />
         <TextField
           label="Bank Number"
-          name="banknum"
-          value={bankInfo?.banknum || ''}
+          name="bankNum"
+          value={bankInfo?.bankNum || ''}
           onChange={handleBankChange}
           fullWidth
         />
