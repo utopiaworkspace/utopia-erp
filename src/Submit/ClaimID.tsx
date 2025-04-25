@@ -26,7 +26,7 @@ export async function handleClaimID(claimType: string) {
             });
 
             // Generate claimId based on the type and counter
-            claimId = claimType === 'General' ? `CLG25-${newCounter.toString().padStart(4, '0')}` : `CLB25-${newCounter.toString().padStart(4, '0')}`;
+            claimId = claimType === 'General' ? `CLG-25${newCounter.toString().padStart(4, '0')}` : `CLB-25${newCounter.toString().padStart(4, '0')}`;
 
             console.log(`Counter incremented to: ${newCounter}`);
             console.log(`Generated Claim ID: ${claimId}`);

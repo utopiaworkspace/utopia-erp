@@ -30,7 +30,11 @@ export default function OrdersPage() {
   });
 
   const handleChange = (field: string, value: any) => {
-    setClaimData({ ...claimData, [field]: value });
+    setClaimData((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === 'claimType' && value === 'General' ? { benefitType: '' } : {}), // Clear benefitType if claimType is empty
+    }));
   };
 
   const updateTotalAmount = (receipts: typeof claimData.receipts) => {
@@ -117,9 +121,9 @@ export default function OrdersPage() {
 
   return (
     <>
-      <Typography variant="h5" gutterBottom>
+      {/* <Typography variant="h5" gutterBottom>
         Welcome to the Claims!
-      </Typography>
+      </Typography> */}
       <Button variant="contained" onClick={() => setOpen(true)}>
         Submit Claim
       </Button>
@@ -225,7 +229,7 @@ export default function OrdersPage() {
                       </LocalizationProvider>
                     {/* </Box> */}
                     <TextField
-                      label="Amount(RM)"
+                      label="Amount (RM)"
                       type="number"
                       fullWidth
                       value={receipt.amount}

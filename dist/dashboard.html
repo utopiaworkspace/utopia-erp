@@ -1,0 +1,15 @@
+<p id="welcomeText" class="lead">
+  Loading user info...
+</p>
+
+<script>
+  const email = localStorage.getItem("userEmail");
+
+  if (email) {
+    document.getElementById("welcomeText").innerText =
+      `Login successful. Welcome ${email}, you're now on the dashboard.`;
+  } else {
+    // ❌ 没登录就来，强制送回首页
+    window.location.href = "/";
+  }
+</script>
