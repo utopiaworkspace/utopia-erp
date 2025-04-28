@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, MenuItem, Grid, IconButton
@@ -13,21 +13,74 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { PickerValue } from '@mui/x-date-pickers/internals';
 import { submitClaim } from '../Submit/SubmitClaim';
+import { useSession } from '../SessionContext';
+import LinearProgress from '@mui/material/LinearProgress';
+import { Navigate, useLocation } from 'react-router';
+import { CircularProgress } from '@mui/material';
+import { db } from '../firebase/firebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
+
 
 export default function OrdersPage() {
+  const { session, loading } = useSession();
+  const [bankInfo, setBankInfo] = useState<any>(null);
+  
+  if (loading) {
+    return <LinearProgress />;
+  }
+  if (!session) {
+    return <Navigate to="/sign-in" state={{ from: location }} />;
+  }
+  const { user } = session;
 
   const currentDate = dayjs(); // Get the current date using dayjs
   
+  const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success'>('confirm');
+  const [openDialog, setOpenDialog] = useState(false);
+
   const [open, setOpen] = useState(false);
   const [claimData, setClaimData] = useState({
+    claimId: '',
     claimType: '',
     benefitType: '',
     unit: '',
     fullName: '',
+    email: user.email,
     phoneNumber: '',
     totalAmount: 0,
+    receiptCount: 0,
     receipts: [{ date: '', description: '', amount: '', file: null }]
   });
+  useEffect(() => {
+    const fetchBankInfo = async () => {
+      if (session?.user?.email) {
+        const bankRef = doc(db, 'bankinfo', session.user.email);
+        const bankDoc = await getDoc(bankRef);
+        if (bankDoc.exists()) {
+          setBankInfo(bankDoc.data());
+        } else {
+          setBankInfo(null); // No bank info found
+        }
+      }
+    };
+
+    fetchBankInfo();
+  }, [session?.user?.email]);
+
+  const handleOpen = () => {
+    if (!bankInfo.bankNum) {
+      alert('Please update your bank information before submitting a claim.');
+      return;
+    }
+    setOpen(true);
+  };
+
+
+  const handleDialogClose = () => {
+    if (dialogState === 'success') {
+      setOpenDialog(false);
+    }
+  };
 
   const handleChange = (field: string, value: any) => {
     setClaimData((prev) => ({
@@ -51,25 +104,61 @@ export default function OrdersPage() {
   const handleReceiptChange = (index: number, field: string, value: any) => {
     const updatedReceipts = [...claimData.receipts];
     updatedReceipts[index][field] = value;
-    updateTotalAmount(updatedReceipts);
-    setClaimData(prev => ({ ...prev, receipts: updatedReceipts }));
+    
+    const total = updatedReceipts.reduce((sum, receipt) => {
+      const amount = parseFloat(receipt.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+  
+    setClaimData(prev => ({ 
+      ...prev, 
+      receipts: updatedReceipts,
+      receiptCount: updatedReceipts.length,
+      totalAmount: total, // <-- set total together
+    }));
   };
+  
+  
   
 
   const addReceipt = () => {
     const newReceipts = [...claimData.receipts, { date: '', description: '', amount: '', file: null }];
-    updateTotalAmount(newReceipts);
-    setClaimData({ ...claimData, receipts: newReceipts });
+  
+    const total = newReceipts.reduce((sum, receipt) => {
+      const amount = parseFloat(receipt.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+  
+    setClaimData(prev => ({ 
+      ...prev, 
+      receipts: newReceipts,
+      receiptCount: newReceipts.length,
+      totalAmount: total,
+    }));
   };
+  
+  
   
   const removeReceipt = (index: number) => {
     const newReceipts = claimData.receipts.filter((_, i) => i !== index);
-    updateTotalAmount(newReceipts);
-    setClaimData({ ...claimData, receipts: newReceipts });
+  
+    const total = newReceipts.reduce((sum, receipt) => {
+      const amount = parseFloat(receipt.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+  
+    setClaimData(prev => ({ 
+      ...prev, 
+      receipts: newReceipts,
+      receiptCount: newReceipts.length,
+      totalAmount: total,
+    }));
   };
+  
   
 
   const handleSubmit = async () => {
+    setDialogState('loading');
     console.log('Claim Data:', claimData);
     const isEmpty = (val: any) => val === null || val === '' || val === undefined;
   
@@ -88,20 +177,26 @@ export default function OrdersPage() {
       missingReceipts
     ) {
       alert("Please fill out all required fields and upload a file for each receipt.");
+      setDialogState('confirm');
+      setOpenDialog(false);
       return;
     }
   
     try {
       const response = await submitClaim(claimData);
-  
+      console.log('Response from submitClaim:', response);
+      
       if (response.success) {
-        alert('Claim submitted successfully!');
+        setClaimData(prev => ({ ...prev, claimId: response.claimId }));
+        setDialogState('success');
+  
       } else {
         alert('Failed to submit claim. Please try again.');
       }
     } catch (error) {
       console.error('Error during claim submission:', error);
       alert('An unexpected error occurred. Please try again.');
+      setOpenDialog(false);
     }
   
     console.log('Submitting claim:', claimData);
@@ -124,7 +219,7 @@ export default function OrdersPage() {
       {/* <Typography variant="h5" gutterBottom>
         Welcome to the Claims!
       </Typography> */}
-      <Button variant="contained" onClick={() => setOpen(true)}>
+      <Button variant="contained" onClick={handleOpen}>
         Submit Claim
       </Button>
       
@@ -221,9 +316,10 @@ export default function OrdersPage() {
                         label="Date"
                         value={receipt.date ? dayjs(receipt.date) : null}
                         maxDate={currentDate}
-                        onChange={(newValue) =>
-                          handleReceiptChange(index, 'date', newValue ? newValue.toISOString() : '')
-                        }
+                        onChange={(newValue) => {
+                          handleReceiptChange(index, 'date', newValue ? newValue.format('YYYY-MM-DD') : '');
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
                       />
 
                       </LocalizationProvider>
@@ -279,10 +375,55 @@ export default function OrdersPage() {
 
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+          <Button onClick={() => setOpenDialog(true)} variant="contained">
             Submit
           </Button>
         </DialogActions>
+      </Dialog>
+      {/* Confirmation and Success Dialog */}
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        {dialogState === 'confirm' && (
+          <>
+            <DialogTitle>Confirm Submit</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to submit the claim? 
+                <br />
+                Total Amount: RM {claimData.totalAmount.toFixed(2)}
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">
+                Confirm
+              </Button>
+            </DialogActions>
+          </>
+        )}
+
+        {dialogState === 'loading' && (
+          <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <CircularProgress />
+            <Typography sx={{ ml: 2 }}>Submitting...</Typography>
+          </DialogContent>
+        )}
+        {dialogState === 'success' && (
+          <>
+            <DialogTitle>Success</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Your claim has been successfully submitted!
+                <br />
+                Your Claim ID is {claimData.claimId}. Please keep it for your records.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleDialogClose} variant="contained" color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </>
+        )}
       </Dialog>
     </>
   );

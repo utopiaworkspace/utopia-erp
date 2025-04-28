@@ -1,28 +1,26 @@
 import { handleClaimID } from "./ClaimID";
 import { ENDPOINTS } from "./endpoints";
-
-async function convertFileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+import { convertFileToBase64 } from "../utils/base64";
 
 export async function submitClaim(claimData: any) {
   try {
-    claimData.action = "upsert_claim";
+    claimData.action = "submit_claim";
 
-    // 🔁 Generate claim ID
+    // Generate claim ID
     const claimId = await handleClaimID(claimData.claimType);
     claimData.claimId = claimId;
+   
 
-    // 🔁 Convert each receipt file to base64
+    const receiptPrefix = claimData.claimType === 'General' ? 'RCG' : 'RCB';
+
+    // Convert each receipt file to base64 and add receipt ID
     const receiptsWithBase64 = await Promise.all(
-      claimData.receipts.map(async (receipt: any) => {
+      claimData.receipts.map(async (receipt: any, index: number) => {
         const base64 = await convertFileToBase64(receipt.file);
+        const receiptNumber = (index + 1).toString().padStart(2, '0'); // 01, 02, 03, etc.
+
         return {
+          receiptId: `${receiptPrefix}-${claimId.slice(-6)}-${receiptNumber}`, // e.g., RCG-250001-001
           receiptDate: receipt.date,
           description: receipt.description,
           amount: receipt.amount,
@@ -40,7 +38,7 @@ export async function submitClaim(claimData: any) {
     console.log("Submitting claim data:", claimData);
 
     const response = await fetch(
-        ENDPOINTS.SUBMIT_CLAIM,
+      ENDPOINTS.SUBMIT_CLAIM,
       {
         method: "POST",
         mode: "no-cors",
@@ -51,9 +49,8 @@ export async function submitClaim(claimData: any) {
       }
     );
 
-    // ❗Note: since you're using `no-cors`, `response.json()` will fail.
-    // You may need to switch to `cors` mode if possible on your Apps Script side.
-    return { success: true };
+    //Note: since you're using `no-cors`, `response.json()` will fail. since using browser, cannot retrieve response body.
+    return { success: true, claimId: claimData.claimId };
   } catch (error) {
     console.error("Error submitting claim:", error);
     throw error;

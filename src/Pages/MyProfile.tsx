@@ -1,13 +1,21 @@
-import * as React from 'react';
-import { useState, useEffect } from 'react';
-import Typography from '@mui/material/Typography';
-import LinearProgress from '@mui/material/LinearProgress';
+import React, { useState, useEffect } from 'react';
+import {
+  Typography,
+  LinearProgress,
+  TextField,
+  Button,
+  Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+} from '@mui/material';
 import { Navigate, useLocation } from 'react-router';
 import { useSession } from '../SessionContext';
-import { doc, getDoc, setDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
-import { TextField, Button, Box } from '@mui/material';
-
+import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
+import { upsertUserInfo } from '../Submit/SubmitInfo';
 
 export default function MyProfile() {
   const { session, loading } = useSession();
@@ -15,37 +23,27 @@ export default function MyProfile() {
   const [userData, setUserData] = useState<any>(null);
   const [bankInfo, setBankInfo] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success'>('confirm');
 
-  // Show a loading indicator while the session is being determined
   if (loading) {
     return <LinearProgress />;
   }
 
-  // Redirect to the sign-in page if the user is not logged in
   if (!session) {
     return <Navigate to="/sign-in" state={{ from: location }} />;
   }
 
   const { user } = session;
 
-  console.log('User:', user);
-
-  // Fetch user and bank information from Firestore
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'users'));
-        console.log("Users collection data:", querySnapshot.docs.map(doc => doc.data()));
-        console.log("Fetching data for user:", user.email);
         const userRef = doc(db, 'users', user.email);
         const userDoc = await getDoc(userRef);
-        console.log("UserDoc exists:", userDoc.exists());
-        console.log("UserDoc data:", userDoc.data());
 
         const bankRef = doc(db, 'bankinfo', user.email);
         const bankDoc = await getDoc(bankRef);
-        console.log("BankDoc exists:", bankDoc.exists());
-        console.log("BankDoc data:", bankDoc.data());
 
         setUserData(userDoc.exists() ? userDoc.data() : {});
         setBankInfo(bankDoc.exists() ? bankDoc.data() : {});
@@ -57,19 +55,16 @@ export default function MyProfile() {
     fetchData();
   }, [user.email]);
 
-  // Handle input changes for user data
   const handleUserChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({ ...userData, [e.target.name]: e.target.value });
   };
 
-  // Handle input changes for bank info
   const handleBankChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBankInfo({ ...bankInfo, [e.target.name]: e.target.value });
   };
 
-  // Save updated data to Firestore
   const handleSave = async () => {
-    setIsSaving(true);
+    setDialogState('loading');
     try {
       if (userData) {
         await setDoc(doc(db, 'users', user.email), userData, { merge: true });
@@ -77,34 +72,48 @@ export default function MyProfile() {
       if (bankInfo) {
         await setDoc(doc(db, 'bankinfo', user.email), bankInfo, { merge: true });
       }
-  
-      // Send to Google Apps Script Web App
-      const combinedData = { ...userData, ...bankInfo, email: user.email };
-      await fetch("https://script.google.com/macros/s/AKfycbzstx__iM7mG_uOAyG_2KAY2eGplYtFRHcV54Ut4R9VDcltJO4y5SrdR8nv8JmKN3LVhw/exec", {
-        method: "POST",
-        mode: "no-cors",
-        body: JSON.stringify(combinedData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-  
-      alert('Profile updated successfully!');
+
+      if (userData && bankInfo) {
+        const payload = {
+          action: 'upsert_userinfo',
+          email: user.email,
+          phoneNum: userData.phoneNum || '',
+          fullName: userData.fullName || '',
+          icNum: userData.icNum || '',
+          bankName: bankInfo.bankName || '',
+          bankNum: bankInfo.bankNum || '',
+          bankHolder: bankInfo.bankHolder || '',
+        };
+
+        console.log('Submitting payload:', payload);
+
+        await upsertUserInfo(payload);
+      }
+
+      setDialogState('success');
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');
+      setOpenDialog(false);
     } finally {
       setIsSaving(false);
     }
   };
-  
-  
+
+  const handleDialogClose = () => {
+    if (dialogState === 'success') {
+      setOpenDialog(false); // Close the dialog
+      setTimeout(() => {
+        setDialogState('confirm'); // Reset dialogState to 'confirm'
+      }, 500); // Delay of 1 second
+    } else {
+      setOpenDialog(false); // Close the dialog immediately for other states
+    }
+  };
 
   return (
     <div>
-      
       <Box component="form" sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* User Information */}
         <Typography variant="h6">User Information</Typography>
         <TextField
           label="Full Name"
@@ -126,7 +135,7 @@ export default function MyProfile() {
           value={user.email || ''}
           onChange={handleUserChange}
           fullWidth
-          disabled // Email is usually not editable
+          disabled
         />
         <TextField
           label="IC"
@@ -143,7 +152,6 @@ export default function MyProfile() {
           fullWidth
         />
 
-        {/* Bank Information */}
         <Typography variant="h6">Bank Information</Typography>
         <TextField
           label="Bank Holder"
@@ -167,16 +175,52 @@ export default function MyProfile() {
           fullWidth
         />
 
-        {/* Save Button */}
         <Button
           variant="contained"
           color="primary"
-          onClick={handleSave}
+          onClick={() => setOpenDialog(true)}
           disabled={isSaving}
         >
           {isSaving ? 'Saving...' : 'Save Changes'}
         </Button>
       </Box>
+
+      {/* Confirmation and Success Dialog */}
+      <Dialog open={openDialog} onClose={handleDialogClose}>
+        {dialogState === 'confirm' && (
+          <>
+            <DialogTitle>Confirm Changes</DialogTitle>
+            <DialogContent>
+              <Typography>Are you sure you want to save these changes?</Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+              <Button onClick={handleSave} variant="contained" color="primary">
+                Confirm
+              </Button>
+            </DialogActions>
+          </>
+        )}
+        {dialogState === 'loading' && (
+          <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <CircularProgress />
+            <Typography sx={{ ml: 2 }}>Saving changes...</Typography>
+          </DialogContent>
+        )}
+        {dialogState === 'success' && (
+          <>
+            <DialogTitle>Success</DialogTitle>
+            <DialogContent>
+              <Typography>Your profile has been updated successfully!</Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleDialogClose} variant="contained" color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </>
+        )}
+      </Dialog>
     </div>
   );
 }
