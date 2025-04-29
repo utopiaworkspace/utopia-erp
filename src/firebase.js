@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth, setPersistence, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 // ✅ 你的 Firebase 项目设定
 const firebaseConfig = {
@@ -14,10 +14,12 @@ const firebaseConfig = {
 
 // ✅ 初始化 App 与 Auth
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
 
-// ✅ 登录封装：调用这个就能 Google 登录
-export const loginWithGoogle = () => {
-  const provider = new GoogleAuthProvider();
-  return signInWithPopup(auth, provider);
+// Function to handle Google login
+export const loginWithGoogle = async () => {
+  return await signInWithPopup(auth, googleProvider);
 };
+
+export { auth };
