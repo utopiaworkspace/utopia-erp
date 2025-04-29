@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, Box, CircularProgress
+  DialogActions, TextField, Box, CircularProgress, LinearProgress, MenuItem
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import dayjs, { Dayjs } from 'dayjs';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { useSession } from '../SessionContext';
 import { Navigate } from 'react-router';
-import LinearProgress from '@mui/material/LinearProgress';
 import { db } from '../firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
-import MenuItem from '@mui/material/MenuItem';
+import dayjs from 'dayjs';
 import submitIncident from '../Submit/SubmitIncident';
 
 export default function IncidentPage() {
@@ -21,9 +19,6 @@ export default function IncidentPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success'>('confirm');
   const [bankInfo, setBankInfo] = useState<any>(null);
-  const currentDate = dayjs(); 
-
-  const user = session?.user || { email: '' };
 
   const [incidentData, setIncidentData] = useState({
     incidentId: '',
@@ -35,33 +30,45 @@ export default function IncidentPage() {
     impact: '',
     date: '',
     file: null as File | null,
-    email: user.email,
+    email: session?.user?.email || '',
   });
 
   useEffect(() => {
-    if (session?.user?.email) {
-      setIncidentData(prev => ({
-        ...prev,
-        
-        email: session.user.email,
-      }));
-
       const fetchBankInfo = async () => {
-        const bankRef = doc(db, 'bankinfo', session.user.email);
-        const bankDoc = await getDoc(bankRef);
-        if (bankDoc.exists()) {
-          setBankInfo(bankDoc.data());
-        } else {
-          setBankInfo(null);
+        if (session?.user?.email) {
+          const bankRef = doc(db, 'bankinfo', session.user.email);
+          const bankDoc = await getDoc(bankRef);
+          if (bankDoc.exists()) {
+            setBankInfo(bankDoc.data());
+          } else {
+            setBankInfo(null); // No bank info found
+          }
         }
       };
-
+  
       fetchBankInfo();
-    }
-  }, [session?.user?.email]);
+    }, [session?.user?.email]);
 
   if (loading) return <LinearProgress />;
   if (!session) return <Navigate to="/sign-in" />;
+
+  const resetDialog = () => {
+    setDialogState('confirm');
+    setOpenDialog(false)
+    setOpen(false)
+    setIncidentData({
+      incidentId: '',
+      unit: '',
+      invoiceNum: '',
+      responsibleName: '',
+      responsibleDept: '',
+      description: '',
+      impact: '',
+      date: '',
+      file: null,
+      email: session?.user?.email || '',
+    }); // Reset the form fields// optional: reset ticket ID
+  };
 
   const handleChange = (field: string, value: any) => {
     setIncidentData(prev => ({
@@ -76,15 +83,32 @@ export default function IncidentPage() {
     }
   };
 
-  const handleSubmit = async () => {
+  const validateForm = () => {
+    const { unit, invoiceNum, description, impact, date, file } = incidentData;
+    if (!unit || !invoiceNum || !description || !impact || !date || !file) {
+      alert('Please fill in all required fields.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (validateForm()) {
+      setOpenDialog(true);
+    }
+  };
+
+  const handleConfirmSubmit = async () => {
     setDialogState('loading');
     try {
       const response = await submitIncident(incidentData);
       if (response.success) {
-        setIncidentData(prev => ({ ...prev, ticketId: response.incidentId }));
-        setDialogState('success');
+       
+        setDialogState('success');      
       } else {
         alert('Failed to submit incident. Please try again.');
+        setOpenDialog(false);
       }
     } catch (error) {
       console.error('Submit Error:', error);
@@ -93,13 +117,15 @@ export default function IncidentPage() {
     }
   };
 
+
+
   return (
     <>
       <Button variant="contained" onClick={() => setOpen(true)}>
         Submit Incident Report
       </Button>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+      <Dialog component="form" open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
         <DialogTitle>Submit Incident Report</DialogTitle>
         <DialogContent dividers>
           <Box display="flex" flexDirection="column" gap={2} mt={2}>
@@ -110,6 +136,7 @@ export default function IncidentPage() {
               fullWidth
               value={incidentData.unit}
               onChange={(e) => handleChange('unit', e.target.value)}
+              required
             >
               <MenuItem value="UTOPIA HOLIDAY SDN BHD">UTOPIA HOLIDAY SDN BHD</MenuItem>
               <MenuItem value="SCAFFOLDING MALAYSIA SDN BHD">SCAFFOLDING MALAYSIA SDN BHD</MenuItem>
@@ -128,20 +155,23 @@ export default function IncidentPage() {
               <MenuItem value="COLD TRUCK MALAYSIA SDN BHD">COLD TRUCK MALAYSIA SDN BHD</MenuItem>
               <MenuItem value="MOBILE WHEELER SDN BHD">MOBILE WHEELER SDN BHD</MenuItem>
             </TextField>
+
             <TextField
               label="Invoice Number"
               fullWidth
               value={incidentData.invoiceNum}
               onChange={(e) => handleChange('invoiceNum', e.target.value)}
+              required
             />
+
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 sx={{ minWidth: "40%" }}
                 label="Date"
-                value={incidentData.date ? dayjs(incidentData.date) : null}
-                maxDate={dayjs()} // Ensure the date picker can't go beyond today's date
+                value={incidentData.date ? dayjs(incidentData.date, 'DD-MM-YYYY') : null}
+                maxDate={dayjs()}
                 onChange={(newValue) => handleChange('date', newValue ? newValue.format('DD-MM-YYYY') : '')}
-                renderInput={(params) => <TextField {...params} />}
+                format='DD-MM-YYYY'
               />
             </LocalizationProvider>
 
@@ -151,12 +181,14 @@ export default function IncidentPage() {
               value={incidentData.responsibleDept}
               onChange={(e) => handleChange('responsibleDept', e.target.value)}
             />
+
             <TextField
               label="Responsible Person"
               fullWidth
               value={incidentData.responsibleName}
               onChange={(e) => handleChange('responsibleName', e.target.value)}
             />
+
             <TextField
               label="Description"
               fullWidth
@@ -164,7 +196,9 @@ export default function IncidentPage() {
               rows={4}
               value={incidentData.description}
               onChange={(e) => handleChange('description', e.target.value)}
+              required
             />
+
             <TextField
               label="Impact"
               fullWidth
@@ -172,7 +206,9 @@ export default function IncidentPage() {
               rows={2}
               value={incidentData.impact}
               onChange={(e) => handleChange('impact', e.target.value)}
+              required
             />
+
             <Button variant="contained" component="label">
               Upload File
               <input type="file" hidden onChange={handleFileChange} />
@@ -182,12 +218,13 @@ export default function IncidentPage() {
                 Selected File: {incidentData.file.name}
               </Typography>
             )}
+
           </Box>
         </DialogContent>
 
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={() => setOpenDialog(true)} variant="contained">
+          <Button type="submit" variant="contained">
             Submit
           </Button>
         </DialogActions>
@@ -203,7 +240,7 @@ export default function IncidentPage() {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained" color="primary">
+              <Button onClick={handleConfirmSubmit} variant="contained" color="primary">
                 Confirm
               </Button>
             </DialogActions>
@@ -224,11 +261,14 @@ export default function IncidentPage() {
               <Typography>
                 Your incident report has been successfully submitted!
                 <br />
-                Your Ticket ID is {incidentData.incidentId}. Please keep it for your records.
+                Your Ticket ID is {incidentData.incidentId}.
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setOpenDialog(false)} variant="contained" color="primary">
+              <Button 
+                onClick={() => {
+                  resetDialog();
+                }} variant="contained" color="primary">
                 Close
               </Button>
             </DialogActions>

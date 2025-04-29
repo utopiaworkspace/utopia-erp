@@ -121,6 +121,7 @@ export default function MyProfile() {
           value={userData?.fullName || ''}
           onChange={handleUserChange}
           fullWidth
+          helperText="e.g. JOHN DOE"
         />
         <TextField
           label="Short Name"
@@ -143,6 +144,7 @@ export default function MyProfile() {
           value={userData?.icNum || ''}
           onChange={handleUserChange}
           fullWidth
+          helperText="Without dash (-). e.g. 021121109012"
         />
         <TextField
           label="Phone Number"
@@ -150,6 +152,7 @@ export default function MyProfile() {
           value={userData?.phoneNum || ''}
           onChange={handleUserChange}
           fullWidth
+          helperText="e.g. 60123456789"
         />
 
         <Typography variant="h6">Bank Information</Typography>
@@ -173,6 +176,7 @@ export default function MyProfile() {
           value={bankInfo?.bankNum || ''}
           onChange={handleBankChange}
           fullWidth
+          helperText="Without spaces. e.g. 123456789012"
         />
 
         <Button

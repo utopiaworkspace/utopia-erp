@@ -21,7 +21,7 @@ import { db } from '../firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 
 
-export default function OrdersPage() {
+export default function ClaimPage() {
   const { session, loading } = useSession();
   const [bankInfo, setBankInfo] = useState<any>(null);
   
@@ -67,6 +67,9 @@ export default function OrdersPage() {
     fetchBankInfo();
   }, [session?.user?.email]);
 
+  
+  
+
   const handleOpen = () => {
     if (!bankInfo.bankNum) {
       alert('Please update your bank information before submitting a claim.');
@@ -75,11 +78,8 @@ export default function OrdersPage() {
     setOpen(true);
   };
 
-
   const handleDialogClose = () => {
-    if (dialogState === 'success') {
-      setOpenDialog(false);
-    }
+    resetDialog();
   };
 
   const handleChange = (field: string, value: any) => {
@@ -90,16 +90,6 @@ export default function OrdersPage() {
     }));
   };
 
-  const updateTotalAmount = (receipts: typeof claimData.receipts) => {
-    const total = receipts.reduce((sum, receipt) => {
-      const amount = parseFloat(receipt.amount);
-      return sum + (isNaN(amount) ? 0 : amount);
-    }, 0);
-  
-    setClaimData(prev => ({ ...prev, totalAmount: total }));
-  };
-  
-  
 
   const handleReceiptChange = (index: number, field: string, value: any) => {
     const updatedReceipts = [...claimData.receipts];
@@ -118,9 +108,6 @@ export default function OrdersPage() {
     }));
   };
   
-  
-  
-
   const addReceipt = () => {
     const newReceipts = [...claimData.receipts, { date: '', description: '', amount: '', file: null }];
   
@@ -135,9 +122,7 @@ export default function OrdersPage() {
       receiptCount: newReceipts.length,
       totalAmount: total,
     }));
-  };
-  
-  
+  }; 
   
   const removeReceipt = (index: number) => {
     const newReceipts = claimData.receipts.filter((_, i) => i !== index);
@@ -154,10 +139,8 @@ export default function OrdersPage() {
       totalAmount: total,
     }));
   };
-  
-  
 
-  const handleSubmit = async () => {
+  const handleConfirmSubmit = async () => {
     setDialogState('loading');
     console.log('Claim Data:', claimData);
     const isEmpty = (val: any) => val === null || val === '' || val === undefined;
@@ -201,18 +184,56 @@ export default function OrdersPage() {
   
     console.log('Submitting claim:', claimData);
     setOpen(false);
+  };  
+
+  const resetDialog = () => {
+    setDialogState('confirm');
+    setOpenDialog(false);
+    setClaimData({
+      claimId: '',
+      claimType: '',
+      benefitType: '',
+      unit: '',
+      fullName: '',
+      email: user.email,
+      phoneNumber: '',
+      totalAmount: 0,
+      receiptCount: 0,
+      receipts: [{ date: '', description: '', amount: '', file: null }]
+    });
+  };
+
+  const validateForm = () => {
+    const requiredFields = ['unit', 'claimType', 'fullName', 'phoneNumber'];
+    
+    // Check if all required fields are filled
+    for (const field of requiredFields) {
+      if (!claimData[field]) {
+        alert(`${field.charAt(0).toUpperCase() + field.slice(1)} is required.`);
+        return false;
+      }
+    }
+  
+    // Validate Receipts
+    const missingReceiptFields = claimData.receipts.some((receipt) => (
+      !receipt.date || !receipt.amount || !receipt.description || !receipt.file
+    ));
+  
+    if (missingReceiptFields) {
+      alert("Please fill out all receipt fields and upload a file for each receipt.");
+      return false;
+    }
+  
+    return true;
   };
   
-
-  function setDateValue(newValue: PickerValue): void {
-    if (newValue) {
-      const updatedReceipts = [...claimData.receipts];
-      updatedReceipts[updatedReceipts.length - 1].date = newValue.toString();
-      setClaimData({ ...claimData, receipts: updatedReceipts });
+  
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (validateForm()) {
+      setOpenDialog(true);
     }
-  }
-
- 
+  };
 
   return (
     <>
@@ -223,7 +244,7 @@ export default function OrdersPage() {
         Submit Claim
       </Button>
       
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+      <Dialog component="form" open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
         <DialogTitle>Submit a New Claim</DialogTitle>
         <DialogContent dividers>
           <Box display="flex" flexDirection="column" gap={2}>
@@ -235,6 +256,7 @@ export default function OrdersPage() {
                 fullWidth
                 value={claimData.claimType}
                 onChange={(e) => handleChange('claimType', e.target.value)}
+                required
               >
                 <MenuItem value="General">General</MenuItem>
                 <MenuItem value="Benefit">Benefit</MenuItem>
@@ -245,6 +267,7 @@ export default function OrdersPage() {
                 fullWidth
                 value={claimData.unit}
                 onChange={(e) => handleChange('unit', e.target.value)}
+                required
               >
                 <MenuItem value="UTOPIA HOLIDAY SDN BHD">UTOPIA HOLIDAY SDN BHD</MenuItem>
                 <MenuItem value="SCAFFOLDING MALAYSIA SDN BHD">SCAFFOLDING MALAYSIA SDN BHD</MenuItem>
@@ -290,12 +313,16 @@ export default function OrdersPage() {
                 fullWidth
                 value={claimData.fullName}
                 onChange={(e) => handleChange('fullName', e.target.value)}
+                helperText="e.g. JOHN DOE"
+                required
               />
               <TextField
                 label="Phone Number"
                 fullWidth
                 value={claimData.phoneNumber}
                 onChange={(e) => handleChange('phoneNumber', e.target.value)}
+                helperText="e.g. 60123456789"
+                required
               />
             </Box>
 
@@ -311,16 +338,17 @@ export default function OrdersPage() {
                   <Box display="flex" gap={2} alignItems="center">
                     {/* <Box display="inline-flex"> */}
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        sx={{ minWidth: "40%" }}
-                        label="Date"
-                        value={receipt.date ? dayjs(receipt.date) : null}
-                        maxDate={currentDate}
-                        onChange={(newValue) => {
-                          handleReceiptChange(index, 'date', newValue ? newValue.format('YYYY-MM-DD') : '');
-                        }}
-                        renderInput={(params) => <TextField {...params} />}
-                      />
+                        <DatePicker
+                          sx={{ minWidth: "40%" }}
+                          label="Date"
+                          value={receipt.date ? dayjs(receipt.date, 'DD-MM-YYYY') : null}
+                          maxDate={currentDate}
+                          onChange={(newValue) => {
+                            handleReceiptChange(index, 'date', newValue ? newValue.format('DD-MM-YYYY') : '');
+                          }}
+                          format="DD-MM-YYYY"
+                          // renderInput={(params) => <TextField {...params} />}
+                        />
 
                       </LocalizationProvider>
                     {/* </Box> */}
@@ -375,7 +403,7 @@ export default function OrdersPage() {
 
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={() => setOpenDialog(true)} variant="contained">
+          <Button type='submit' variant="contained">
             Submit
           </Button>
         </DialogActions>
@@ -394,7 +422,7 @@ export default function OrdersPage() {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-              <Button onClick={handleSubmit} variant="contained" color="primary">
+              <Button onClick={handleConfirmSubmit} variant="contained" color="primary">
                 Confirm
               </Button>
             </DialogActions>
