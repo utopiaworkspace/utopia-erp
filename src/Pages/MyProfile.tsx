@@ -139,12 +139,12 @@ export default function MyProfile() {
           disabled
         />
         <TextField
-          label="IC"
+          label="IC No."
           name="icNum"
           value={userData?.icNum || ''}
           onChange={handleUserChange}
           fullWidth
-          helperText="Without dash (-). e.g. 021121109012"
+          helperText="e.g. 021121-10-9012"
         />
         <TextField
           label="Phone Number"

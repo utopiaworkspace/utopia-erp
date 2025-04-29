@@ -341,18 +341,24 @@ export default function ClaimPage() {
                         <DatePicker
                           sx={{ minWidth: "40%" }}
                           label="Date"
-                          value={receipt.date ? dayjs(receipt.date, 'DD-MM-YYYY') : null}
+                          value={receipt.date ? dayjs(receipt.date, 'DD/MM/YYYY') : null}
                           maxDate={currentDate}
                           onChange={(newValue) => {
-                            handleReceiptChange(index, 'date', newValue ? newValue.format('DD-MM-YYYY') : '');
+                            handleReceiptChange(index, 'date', newValue ? newValue.format('DD/MM/YYYY') : '');
                           }}
-                          format="DD-MM-YYYY"
+                          format="DD/MM/YYYY"
+                          slotProps={{
+                            textField: {
+                              required: true,
+                            },
+                          }}
                           // renderInput={(params) => <TextField {...params} />}
                         />
 
                       </LocalizationProvider>
                     {/* </Box> */}
                     <TextField
+                      required
                       label="Amount (RM)"
                       type="number"
                       fullWidth
@@ -365,8 +371,9 @@ export default function ClaimPage() {
                   </Box>
                   <Box>
                     <Button variant="outlined" component="label" fullWidth>
-                      {receipt.file ? `File: ${receipt.file.name}` : "Upload File"}
+                      {receipt.file ? `File: ${receipt.file.name}` : "Receipt Image or PDF"}
                       <input
+                        required
                         type="file"
                         hidden
                         onChange={(e) =>
@@ -377,6 +384,7 @@ export default function ClaimPage() {
                   </Box>  
                   <Box>
                     <TextField
+                      required
                       label="Description"
                       fullWidth
                       multiline

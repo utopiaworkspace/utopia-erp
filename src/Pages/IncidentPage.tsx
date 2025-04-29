@@ -84,8 +84,8 @@ export default function IncidentPage() {
   };
 
   const validateForm = () => {
-    const { unit, invoiceNum, description, impact, date, file } = incidentData;
-    if (!unit || !invoiceNum || !description || !impact || !date || !file) {
+    const { unit, invoiceNum, description, date } = incidentData;
+    if (!unit || !invoiceNum || !description || !date) {
       alert('Please fill in all required fields.');
       return false;
     }
@@ -166,12 +166,18 @@ export default function IncidentPage() {
 
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
+
                 sx={{ minWidth: "40%" }}
                 label="Date"
-                value={incidentData.date ? dayjs(incidentData.date, 'DD-MM-YYYY') : null}
+                value={incidentData.date ? dayjs(incidentData.date, 'DD/MM/YYYY') : null}
                 maxDate={dayjs()}
-                onChange={(newValue) => handleChange('date', newValue ? newValue.format('DD-MM-YYYY') : '')}
-                format='DD-MM-YYYY'
+                onChange={(newValue) => handleChange('date', newValue ? newValue.format('DD/MM/YYYY') : '')}
+                format='DD/MM/YYYY'
+                slotProps={{
+                  textField: {
+                    required: true,
+                  },
+                }}
               />
             </LocalizationProvider>
 
@@ -188,6 +194,23 @@ export default function IncidentPage() {
               value={incidentData.responsibleName}
               onChange={(e) => handleChange('responsibleName', e.target.value)}
             />
+            <Typography>
+              Incident Details
+            </Typography>
+            <Box>
+              <Button variant="outlined" component="label" fullWidth>
+
+                {incidentData.file ? `File: ${incidentData.file.name}` : "Incident Image or PDF"}
+                <input
+                  
+                  accept="image/*,application/pdf"
+                  type="file"
+                  hidden
+                  
+                  onChange={handleFileChange}
+                />
+              </Button>
+            </Box> 
 
             <TextField
               label="Description"
@@ -206,10 +229,11 @@ export default function IncidentPage() {
               rows={2}
               value={incidentData.impact}
               onChange={(e) => handleChange('impact', e.target.value)}
-              required
+              
             />
+            
 
-            <Button variant="contained" component="label">
+            {/* <Button variant="contained" component="label">
               Upload File
               <input type="file" hidden onChange={handleFileChange} />
             </Button>
@@ -217,7 +241,7 @@ export default function IncidentPage() {
               <Typography variant="body2" mt={1}>
                 Selected File: {incidentData.file.name}
               </Typography>
-            )}
+            )} */}
 
           </Box>
         </DialogContent>

@@ -22,7 +22,7 @@ export async function handleIncidentID() {
       });
 
       // Format incident ID
-      incidentId = `IR-25${newCounter.toString().padStart(4, '0')}`;
+      incidentId = `IR-1${newCounter.toString().padStart(3, '0')}`;
 
       console.log(`Counter incremented to: ${newCounter}`);
       console.log(`Generated Incident ID: ${incidentId}`);
