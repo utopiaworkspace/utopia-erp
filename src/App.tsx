@@ -9,6 +9,7 @@ import { ReactRouterAppProvider } from '@toolpad/core/react-router';
 import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
 import { Outlet, useNavigate } from 'react-router';
 import type { Navigation } from '@toolpad/core';
+import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import {
   firebaseSignOut,
   signInWithGoogle,
@@ -39,6 +40,11 @@ const NAVIGATION: Navigation = [
     segment: 'my-profile',
     title: 'My Profile',
     icon: <AccountCircleIcon />,
+  },
+  {
+    segment: 'rmb-dashboard',
+    title: 'RMB Dashboard',
+    icon: <TwoWheelerIcon />,
   },
 ];
 

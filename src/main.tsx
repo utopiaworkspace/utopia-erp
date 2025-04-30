@@ -4,10 +4,11 @@ import { createBrowserRouter, RouterProvider } from 'react-router';
 import App from './App';
 import Layout from './Layout/Dashboard';
 import DashboardPage from './Pages';
-import ClaimPage from './Pages/ClaimPage';
 import MyProfile from './Pages/MyProfile';
-import IncidentPage from './Pages/IncidentPage';
 import SignInPage from './SignIn/SignIn'; // Import the sign-in page
+import RMBDashboard from './RMB/RMBDashboard';
+import IncidentPage from './Pages/IncidentPage';
+import ClaimPage from './Pages/ClaimPage';
 
 
 const router = createBrowserRouter([
@@ -33,6 +34,10 @@ const router = createBrowserRouter([
           {
             path: '/my-profile',
             Component: MyProfile,
+          },
+          {
+            path: '/rmb-dashboard',
+            Component: RMBDashboard,
           },
         ],
       },
