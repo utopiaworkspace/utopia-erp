@@ -4,7 +4,7 @@ import SignIn from "./SignIn/SignIn";
 import Appe from "./App"; // Import the Toolpad dashboard wrapper
 import HomePage from "./Pages/ClaimPage"; // Import HomePage if needed
 import ProtectedRoute from "./ProtectedRoutes";
-import Layout from "./Layout/Dashboard"; // Import your layout component
+import Layout from "./Layout/MainLayout"; // Import your layout component
 
 const AppRoutes = () => {
   return (

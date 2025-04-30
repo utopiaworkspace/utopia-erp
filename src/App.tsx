@@ -42,9 +42,10 @@ const NAVIGATION: Navigation = [
     icon: <AccountCircleIcon />,
   },
   {
-    segment: 'rmb-dashboard',
-    title: 'RMB Dashboard',
+    segment: 'vehicles',
+    title: 'Vehicles',
     icon: <TwoWheelerIcon />,
+    pattern: 'vehicles{/:vehiclesId}*',
   },
 ];
 
