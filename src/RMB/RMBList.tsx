@@ -10,6 +10,7 @@ import {
     Crud,
     Create,
     CrudProvider,
+
     DataModel,
     DataSource,
     DataSourceCache,
@@ -17,7 +18,7 @@ import {
     List,
     Show,
   } from '@toolpad/core/Crud';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import {
     collection,
     doc,
@@ -35,6 +36,7 @@ import {
     getFirestore,
   } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
+import { GridToolbar } from '@mui/x-data-grid/internals';
 
 const vehiclesCollection = collection(db, 'vehicles');
   
@@ -74,23 +76,94 @@ export const vehiclesDataSource: DataSource<Vehicle> = {
       ],
       
   
-    getMany: async ({ paginationModel }) => {
-      const pageSize = paginationModel.pageSize;
-      const offset = paginationModel.page * pageSize;
+    // getMany: async ({ paginationModel, filterModel, sortModel }) => {
+
+    //   await new Promise((resolve) => {
+    //     setTimeout(resolve, 750);
+    //   });
+
+    //   const pageSize = paginationModel.pageSize;
+    //   const offset = paginationModel.page * pageSize;
   
-      const q = query(vehiclesCollection, orderBy('plateNumber'), limit(1000));
-      const snapshot = await getDocs(q);
-      const allDocs = snapshot.docs.map((docSnap) => ({
-        id: docSnap.id,
-        ...docSnap.data(),
+    //   const q = query(vehiclesCollection, orderBy('plateNumber'), limit(1000));
+    //   const snapshot = await getDocs(q);
+    //   const allDocs = snapshot.docs.map((docSnap) => ({
+    //     id: docSnap.id,
+    //     ...docSnap.data(),
+    //   })) as Vehicle[];
+  
+    //   return {
+    //     items: allDocs.slice(offset, offset + pageSize),
+    //     itemCount: allDocs.length,
+    //   };
+    // },
+  
+    getMany: async ({ paginationModel, filterModel, sortModel }) => {
+      // Simulate loading delay
+      await new Promise((resolve) => {
+        setTimeout(resolve, 750);
+      });
+  
+      const snapshot = await getDocs(vehiclesCollection);
+      let processedVehicles = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
       })) as Vehicle[];
   
-      return {
-        items: allDocs.slice(offset, offset + pageSize),
-        itemCount: allDocs.length,
-      };
-    },
+      if (filterModel?.items?.length) {
+        filterModel.items.forEach(({ field, value, operator }) => {
+          if (!field || value == null) {
+            return;
+          }
+          processedVehicles = processedVehicles.filter((vehicles) => {
+            const vehiclesValue = vehicles[field];
+            switch (operator) {
+              case 'contains':
+                return String(vehiclesValue)
+                  .toLowerCase()
+                  .includes(String(value).toLowerCase());
+              case 'equals':
+                return vehiclesValue === value;
+              case 'startsWith':
+                return String(vehiclesValue)
+                  .toLowerCase()
+                  .startsWith(String(value).toLowerCase());
+              case 'endsWith':
+                return String(vehiclesValue)
+                  .toLowerCase()
+                  .endsWith(String(value).toLowerCase());
+              case '>':
+                return (vehiclesValue as number) > value;
+              case '<':
+                return (vehiclesValue as number) < value;
+              default:
+                return true;
+            }
+          });
+        });
+      }
   
+      if (sortModel?.length) {
+        processedVehicles.sort((a, b) => {
+          for (const { field, sort } of sortModel) {
+            if ((a[field] as number) < (b[field] as number)) {
+              return sort === 'asc' ? -1 : 1;
+            }
+            if ((a[field] as number) > (b[field] as number)) {
+              return sort === 'asc' ? 1 : -1;
+            }
+          }
+          return 0;
+        });
+      }
+  
+      const start = paginationModel.page * paginationModel.pageSize;
+      const end = start + paginationModel.pageSize;
+      const paginatedPeople = processedVehicles.slice(start, end);
+  
+      return { items: paginatedPeople, itemCount: processedVehicles.length };
+    },
+
     getOne: async (id) => {
       const ref = doc(vehiclesCollection, id);
       const docSnap = await getDoc(ref);
@@ -207,6 +280,8 @@ export default function RMBList() {
             slotProps={{
               dataGrid: {
                 showToolbar: true,
+                slots: { toolbar: GridToolbar },
+  
                 onRowClick: (params) => handleRowClick(params.row.id),
                 initialState: {
                   columns: {

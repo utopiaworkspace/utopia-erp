@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, Box, CircularProgress, LinearProgress, MenuItem
+  DialogActions, TextField, Box, CircularProgress, LinearProgress, MenuItem, Card, CardContent
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -22,55 +22,96 @@ export default function IncidentPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success'>('confirm');
   const [bankInfo, setBankInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [teamInfo, setTeamInfo] = useState<any>(null);
 
   const [incidentData, setIncidentData] = useState({
     incidentId: '',
-    unit: '',
     invoiceNum: '',
+    email: session?.user?.email || '',
+    userName: userInfo?.shortName || '',
+    unit: '',
+    dept: '',
+    phoneNum: '',
     responsibleName: '',
     responsibleDept: '',
     description: '',
     impact: '',
     date: '',
     file: null as File | null,
-    email: session?.user?.email || '',
   });
 
   useEffect(() => {
-      const fetchBankInfo = async () => {
-        if (session?.user?.email) {
-          const bankRef = doc(db, 'bankinfo', session.user.email);
-          const bankDoc = await getDoc(bankRef);
-          if (bankDoc.exists()) {
-            setBankInfo(bankDoc.data());
-          } else {
-            setBankInfo(null); // No bank info found
-          }
+    const fetchInfo = async () => {
+      if (session?.user?.email) {
+        const bankRef = doc(db, 'bankinfo', session.user.email);
+        const userRef = doc(db, 'users', session.user.email);
+        const teamRef = doc(db, 'teaminfo', session.user.email);
+        const bankDoc = await getDoc(bankRef);
+        const userDoc = await getDoc(userRef);
+        const teamDoc = await getDoc(teamRef);
+        if (bankDoc.exists()) {
+          setBankInfo(bankDoc.data());
+        } else {
+          setBankInfo(null); // No bank info found
         }
-      };
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setUserInfo(data);
+          console.log(data);
+          setIncidentData(prev => ({
+            ...prev,
+            userName: data.shortName || '', // Assuming shortName is the field for user's name
+            phoneNum: data.phoneNum || '', // Assuming phoneNum is the field for user's phone number
+          }));
+        } else {
+          setUserInfo(null); // No bank info found
+        }
+        if (teamDoc.exists()) {
+          setTeamInfo(teamDoc.data());
+        } else {
+          setTeamInfo(null); // No team info found
+        }
+      }
+    };
   
-      fetchBankInfo();
-    }, [session?.user?.email]);
+    fetchInfo();
+  }, [session?.user?.email]);
+
+  
+
+  
+  
+  const handleOpen = () => {
+    if (!bankInfo || !userInfo || !teamInfo) {
+      alert('Please update your personal information before submitting a claim.');
+      return;
+    }
+    setOpen(true);
+  };
 
   if (loading) return <LinearProgress />;
   if (!session) return <Navigate to="/sign-in" />;
 
   const resetDialog = () => {
     setDialogState('confirm');
-    setOpenDialog(false)
-    setOpen(false)
+    setOpenDialog(false);
+    setOpen(false);
     setIncidentData({
       incidentId: '',
-      unit: '',
       invoiceNum: '',
+      email: session?.user?.email || '',
+      userName: userInfo?.shortName || '',
+      unit: '',
+      dept: '',
+      phoneNum: '',
       responsibleName: '',
       responsibleDept: '',
       description: '',
       impact: '',
-      date: '',
+      date: incidentData?.date,
       file: null,
-      email: session?.user?.email || '',
-    }); // Reset the form fields// optional: reset ticket ID
+    });
   };
 
   const handleChange = (field: string, value: any) => {
@@ -96,6 +137,7 @@ export default function IncidentPage() {
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log(incidentData);
     e.preventDefault();
     if (validateForm()) {
       setOpenDialog(true);
@@ -124,25 +166,33 @@ export default function IncidentPage() {
 
   return (
     <>
-      <Button variant="contained" onClick={() => setOpen(true)}>
+      <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
+        <CardContent>
+          <Typography variant="body1" color="text.secondary">
+            This page allows you to submit an <strong>incident report</strong>. 
+            Please fill out the form by clicking on the button and upload the necessary details.
+          </Typography>
+        </CardContent>
+      </Card>
+      <Button variant="contained" onClick={handleOpen}>
         Submit Incident Report
       </Button>
 
       <Dialog component="form" open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
-              <DialogTitle>Submit Incident Report</DialogTitle>
-              <IncidentForm 
-                    data={incidentData} 
-                    onChange={handleChange} 
-                    onFileChange={handleFileChange} 
-                />
-      
-              <DialogActions>
-                <Button onClick={() => setOpen(false)}>Cancel</Button>
-                <Button type="submit" variant="contained">
-                  Submit
-                </Button>
-              </DialogActions>
-            </Dialog>
+        <DialogTitle>Submit Incident Report</DialogTitle>
+        <IncidentForm 
+              data={incidentData} 
+              onChange={handleChange} 
+              onFileChange={handleFileChange} 
+          />
+
+        <DialogActions>
+          <Button onClick={() => setOpen(false)}>Cancel</Button>
+          <Button type="submit" variant="contained">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       
 

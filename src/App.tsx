@@ -10,6 +10,7 @@ import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
 import { Outlet, useNavigate } from 'react-router';
 import type { Navigation } from '@toolpad/core';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
+import CarRentalIcon from '@mui/icons-material/CarRental';
 import {
   firebaseSignOut,
   signInWithGoogle,
@@ -41,12 +42,18 @@ const NAVIGATION: Navigation = [
     title: 'My Profile',
     icon: <AccountCircleIcon />,
   },
-  {
-    segment: 'vehicles',
-    title: 'Vehicles',
-    icon: <TwoWheelerIcon />,
-    pattern: 'vehicles{/:vehiclesId}*',
-  },
+  // {
+  //   segment: 'vehicles',
+  //   title: 'Vehicles',
+  //   icon: <TwoWheelerIcon />,
+  //   // pattern: 'vehicles{/:vehiclesId}*',
+  // },
+  // {
+  //   segment: 'vehicles-rental',
+  //   title: 'Vehicles Rental',
+  //   icon: <CarRentalIcon />,
+
+  // },
 ];
 
 const BRANDING = {

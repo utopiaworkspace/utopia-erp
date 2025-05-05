@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, MenuItem, Grid, IconButton
+  DialogActions, TextField, MenuItem, Grid, IconButton, Card, CardContent
 } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import Box from '@mui/material/Box';
@@ -24,6 +24,8 @@ import ClaimForm from '../components/ClaimForm';
 export default function ClaimPage() {
   const { session, loading } = useSession();
   const [bankInfo, setBankInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [teamInfo, setTeamInfo] = useState<any>(null);
   
   if (loading) {
     return <LinearProgress />;
@@ -52,27 +54,43 @@ export default function ClaimPage() {
     receipts: [{ date: '', description: '', amount: '', file: null }]
   });
   useEffect(() => {
-    const fetchBankInfo = async () => {
+    const fetchInfo = async () => {
       if (session?.user?.email) {
         const bankRef = doc(db, 'bankinfo', session.user.email);
+        const userRef = doc(db, 'users', session.user.email);
+        const teamRef = doc(db, 'teaminfo', session.user.email);
         const bankDoc = await getDoc(bankRef);
+        const userDoc = await getDoc(userRef);
+        const teamDoc = await getDoc(teamRef);
         if (bankDoc.exists()) {
           setBankInfo(bankDoc.data());
         } else {
           setBankInfo(null); // No bank info found
         }
+        if (userDoc.exists()) {
+          setUserInfo(userDoc.data());
+          claimData.fullName = userDoc.data().fullName || ''; 
+          claimData.phoneNumber = userDoc.data().phoneNum || ''; 
+        } else {
+          setUserInfo(null); // No bank info found
+        }
+        if (teamDoc.exists()) {
+          setTeamInfo(teamDoc.data());
+        } else {
+          setTeamInfo(null); // No bank info found
+        }
       }
     };
 
-    fetchBankInfo();
+    fetchInfo();
   }, [session?.user?.email]);
 
   
   
 
   const handleOpen = () => {
-    if (!bankInfo.bankNum) {
-      alert('Please update your bank information before submitting a claim.');
+    if (!bankInfo || !userInfo || !teamInfo) {
+      alert('Please update your personal information before submitting a claim.');
       return;
     }
     setOpen(true);
@@ -195,9 +213,9 @@ export default function ClaimPage() {
       claimType: '',
       benefitType: '',
       unit: '',
-      fullName: '',
+      fullName: userInfo?.fullName || '', // Use userInfo state to set the full name
       email: user.email,
-      phoneNumber: '',
+      phoneNumber: userInfo?.phoneNum || '', // Use userInfo state to set the phone number
       totalAmount: 0,
       receiptCount: 0,
       receipts: [{ date: '', description: '', amount: '', file: null }]
@@ -231,6 +249,7 @@ export default function ClaimPage() {
   
   
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log(claimData);
     e.preventDefault();
     if (validateForm()) {
       setOpenDialog(true);
@@ -239,9 +258,17 @@ export default function ClaimPage() {
 
   return (
     <>
-      {/* <Typography variant="h5" gutterBottom>
-        Welcome to the Claims!
-      </Typography> */}
+      
+      <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
+        <CardContent>
+          <Typography variant="body1" color="text.secondary">
+            This page allows you to submit a claim for reimbursement. 
+            Please fill out the form by clicking on the button and upload the necessary receipts. The form covers both <strong>general</strong> claims and <strong>benefit</strong> claims.
+          </Typography>
+        </CardContent>
+      </Card>
+
+      
       <Button variant="contained" onClick={handleOpen}>
         Submit Claim
       </Button>
@@ -273,6 +300,7 @@ export default function ClaimPage() {
         onCloseSuccess={resetDialog} // Add this line
         claimId={claimData.claimId}
         totalAmount={claimData.totalAmount}
+        receiptCount={claimData.receiptCount}
         />
 
       

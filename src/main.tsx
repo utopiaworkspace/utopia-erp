@@ -1,5 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom/client';
+
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import App from './App';
 import Layout from './Layout/MainLayout';
@@ -45,7 +46,7 @@ const router = createBrowserRouter([
               {
                 index: true, 
                 Component: RMBList,
-              },
+              },  
               {
                 path: 'new', // /vehicles/new
                 Component: RMBList,
@@ -59,6 +60,28 @@ const router = createBrowserRouter([
                 Component: RMBList,
               },
             ]
+          },
+          {
+            path: '/vehicles-rental/',
+            Component: RMBDashboard,
+            // children: [
+            //   {
+            //     index: true, 
+            //     Component: RMBList,
+            //   },  
+            //   {
+            //     path: 'new', // /vehicles/new
+            //     Component: RMBList,
+            //   },
+            //   {
+            //     path: ':vehicleId', // /vehicles/:vehicleId
+            //     Component: RMBList,
+            //   },
+            //   {
+            //     path: ':vehicleId/edit', // /vehicles/:vehicleId/edit
+            //     Component: RMBList,
+            //   },
+            // ]
           },
           
         ],

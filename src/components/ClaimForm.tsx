@@ -100,7 +100,7 @@ export default function ClaimForm({
         value={data.fullName}
         onChange={(e) => onChange('fullName', e.target.value)}
         required
-        helperText="e.g. JOHN DOE"
+        helperText="e.g. MUHAMMAD ALI BIN ABU BAKAR"
       />
 
       <TextField
@@ -119,7 +119,7 @@ export default function ClaimForm({
           <Box display="flex" gap={2} alignItems="center">
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
-                label="Date"
+                label="Receipt Date"
                 value={receipt.date ? dayjs(receipt.date, 'DD/MM/YYYY') : null}
                 onChange={(date) =>
                   onReceiptChange(index, 'date', date ? date.format('DD/MM/YYYY') : '')
@@ -168,6 +168,7 @@ export default function ClaimForm({
             value={receipt.description}
             onChange={(e) => onReceiptChange(index, 'description', e.target.value)}
             required
+            helperText="e.g. Claim for Petrol - Meeting at Ibnu Sina Warehouse on xx/xx/xxxx"
           />
 
           {index < data.receipts.length - 1 && <Divider />}

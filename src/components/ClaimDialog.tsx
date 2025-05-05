@@ -9,9 +9,10 @@ interface Props {
   onCloseSuccess: () => void;
   claimId: string;
   totalAmount: number;
+  receiptCount: number;
 }
 
-export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseSuccess, claimId, totalAmount }: Props) {
+export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseSuccess, claimId, totalAmount, receiptCount }: Props) {
   return (
     <Dialog open={open} onClose={onCancel}>
       {state === 'confirm' && (
@@ -22,6 +23,8 @@ export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseS
             Are you sure you want to submit the claim? 
             <br />
             Total Amount: RM {totalAmount.toFixed(2)}
+            <br />
+            Number of Receipts: {receiptCount}
             </Typography>
           </DialogContent>
           <DialogActions>
