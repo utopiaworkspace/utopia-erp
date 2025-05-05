@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, MenuItem, Grid, IconButton
+  DialogActions, TextField, MenuItem, Grid, IconButton, Card, CardContent
 } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import Box from '@mui/material/Box';
@@ -10,8 +10,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs, { Dayjs } from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
-import { PickerValue } from '@mui/x-date-pickers/internals';
 import { submitClaim } from '../Submit/SubmitClaim';
 import { useSession } from '../SessionContext';
 import LinearProgress from '@mui/material/LinearProgress';
@@ -19,11 +17,15 @@ import { Navigate, useLocation } from 'react-router';
 import { CircularProgress } from '@mui/material';
 import { db } from '../firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
+import ClaimDialog from '../components/ClaimDialog';
+import ClaimForm from '../components/ClaimForm';
 
 
 export default function ClaimPage() {
   const { session, loading } = useSession();
   const [bankInfo, setBankInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [teamInfo, setTeamInfo] = useState<any>(null);
   
   if (loading) {
     return <LinearProgress />;
@@ -52,27 +54,43 @@ export default function ClaimPage() {
     receipts: [{ date: '', description: '', amount: '', file: null }]
   });
   useEffect(() => {
-    const fetchBankInfo = async () => {
+    const fetchInfo = async () => {
       if (session?.user?.email) {
         const bankRef = doc(db, 'bankinfo', session.user.email);
+        const userRef = doc(db, 'users', session.user.email);
+        const teamRef = doc(db, 'teaminfo', session.user.email);
         const bankDoc = await getDoc(bankRef);
+        const userDoc = await getDoc(userRef);
+        const teamDoc = await getDoc(teamRef);
         if (bankDoc.exists()) {
           setBankInfo(bankDoc.data());
         } else {
           setBankInfo(null); // No bank info found
         }
+        if (userDoc.exists()) {
+          setUserInfo(userDoc.data());
+          claimData.fullName = userDoc.data().fullName || ''; 
+          claimData.phoneNumber = userDoc.data().phoneNum || ''; 
+        } else {
+          setUserInfo(null); // No bank info found
+        }
+        if (teamDoc.exists()) {
+          setTeamInfo(teamDoc.data());
+        } else {
+          setTeamInfo(null); // No bank info found
+        }
       }
     };
 
-    fetchBankInfo();
+    fetchInfo();
   }, [session?.user?.email]);
 
   
   
 
   const handleOpen = () => {
-    if (!bankInfo.bankNum) {
-      alert('Please update your bank information before submitting a claim.');
+    if (!bankInfo || !userInfo || !teamInfo) {
+      alert('Please update your personal information before submitting a claim.');
       return;
     }
     setOpen(true);
@@ -189,19 +207,21 @@ export default function ClaimPage() {
   const resetDialog = () => {
     setDialogState('confirm');
     setOpenDialog(false);
+    setOpen(false); // Add this to close the form dialog
     setClaimData({
       claimId: '',
       claimType: '',
       benefitType: '',
       unit: '',
-      fullName: '',
+      fullName: userInfo?.fullName || '', // Use userInfo state to set the full name
       email: user.email,
-      phoneNumber: '',
+      phoneNumber: userInfo?.phoneNum || '', // Use userInfo state to set the phone number
       totalAmount: 0,
       receiptCount: 0,
       receipts: [{ date: '', description: '', amount: '', file: null }]
     });
   };
+  
 
   const validateForm = () => {
     const requiredFields = ['unit', 'claimType', 'fullName', 'phoneNumber'];
@@ -229,6 +249,7 @@ export default function ClaimPage() {
   
   
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log(claimData);
     e.preventDefault();
     if (validateForm()) {
       setOpenDialog(true);
@@ -237,178 +258,32 @@ export default function ClaimPage() {
 
   return (
     <>
-      {/* <Typography variant="h5" gutterBottom>
-        Welcome to the Claims!
-      </Typography> */}
+      
+      <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
+        <CardContent>
+          <Typography variant="body1" color="text.secondary">
+            This page allows you to submit a claim for reimbursement. 
+            Please fill out the form by clicking on the button and upload the necessary receipts. The form covers both <strong>general</strong> claims and <strong>benefit</strong> claims.
+          </Typography>
+        </CardContent>
+      </Card>
+
+      
       <Button variant="contained" onClick={handleOpen}>
         Submit Claim
       </Button>
       
       <Dialog component="form" open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
         <DialogTitle>Submit a New Claim</DialogTitle>
-        <DialogContent dividers>
-          <Box display="flex" flexDirection="column" gap={2}>
-            {/* Claim Info */}
-            <Box display="flex" gap={2}>
-              <TextField
-                label="Claim Type"
-                select
-                fullWidth
-                value={claimData.claimType}
-                onChange={(e) => handleChange('claimType', e.target.value)}
-                required
-              >
-                <MenuItem value="General">General</MenuItem>
-                <MenuItem value="Benefit">Benefit</MenuItem>
-              </TextField>
-              <TextField
-                label="Unit"
-                select
-                fullWidth
-                value={claimData.unit}
-                onChange={(e) => handleChange('unit', e.target.value)}
-                required
-              >
-                <MenuItem value="UTOPIA HOLIDAY SDN BHD">UTOPIA HOLIDAY SDN BHD</MenuItem>
-                <MenuItem value="SCAFFOLDING MALAYSIA SDN BHD">SCAFFOLDING MALAYSIA SDN BHD</MenuItem>
-                <MenuItem value="IBNU SINA CARE SDN BHD">IBNU SINA CARE SDN BHD</MenuItem>
-                <MenuItem value="REV MOVE SDN BHD">REV MOVE SDN BHD</MenuItem>
-                <MenuItem value="REV MOVE UTARA SDN BHD">REV MOVE UTARA SDN BHD</MenuItem>
-                <MenuItem value="KAK KENDURI SDN BHD">KAK KENDURI SDN BHD</MenuItem>
-                <MenuItem value="ENCIK BEKU AIRCOND SDN BHD">ENCIK BEKU AIRCOND SDN BHD</MenuItem>
-                <MenuItem value="BUTIK GLAM & LUX SDN BHD">BUTIK GLAM & LUX SDN BHD</MenuItem>
-                <MenuItem value="PULSE PIALTES SDN BHD">PULSE PIALTES SDN BHD</MenuItem>
-                <MenuItem value="ANJAKAN STRATEGIK SDN BHD">ANJAKAN STRATEGIK SDN BHD</MenuItem>
-                <MenuItem value="MIMPIAN ASTAKA SDN BHD">MIMPIAN ASTAKA SDN BHD</MenuItem>
-                <MenuItem value="MEKAR BUDI SDN BHD">MEKAR BUDI SDN BHD</MenuItem>
-                <MenuItem value="MUTIARA EMBUN SDN BHD">MUTIARA EMBUN SDN BHD</MenuItem>
-                <MenuItem value="MERRY ELDERLY CARE SDN BHD">MERRY ELDERLY CARE SDN BHD</MenuItem>
-                <MenuItem value="COLD TRUCK MALAYSIA SDN BHD">COLD TRUCK MALAYSIA SDN BHD</MenuItem>
-                <MenuItem value="MOBILE WHEELER SDN BHD">MOBILE WHEELER SDN BHD</MenuItem>
-              </TextField>
-            </Box>
-            {/* Conditional Benefit Type Field */}
-            {claimData.claimType === 'Benefit' && (
-              <Box display="flex" gap={2}>
-                <TextField
-                  label="Benefit Type"
-                  select
-                  fullWidth
-                  value={claimData.benefitType || ''}
-                  onChange={(e) => handleChange('benefitType', e.target.value)}
-                >
-                  <MenuItem value="OUT-PATIENT (SELF)">OUT-PATIENT (SELF)</MenuItem>
-                  <MenuItem value="OUT-PATIENT (SPOUSE & CHILDREN)">OUT-PATIENT (SPOUSE & CHILDREN)</MenuItem>
-                  <MenuItem value="SPORTS">SPORTS</MenuItem>
-                  <MenuItem value="WELLNESS">WELLNESS</MenuItem>
-                  <MenuItem value="FAMILY TREAT">FAMILY TREAT</MenuItem>
-                  <MenuItem value="MOTOR SUBSIDY">MOTOR SUBSIDY</MenuItem>
-                  <MenuItem value="FAREWELL">FAREWELL</MenuItem>
-                </TextField>
-              </Box>  
-            )}
-            <Box display="flex" gap={2}>
-              <TextField
-                label="Full Name"
-                fullWidth
-                value={claimData.fullName}
-                onChange={(e) => handleChange('fullName', e.target.value)}
-                helperText="e.g. JOHN DOE"
-                required
-              />
-              <TextField
-                label="Phone Number"
-                fullWidth
-                value={claimData.phoneNumber}
-                onChange={(e) => handleChange('phoneNumber', e.target.value)}
-                helperText="e.g. 60123456789"
-                required
-              />
-            </Box>
-
-            {/* Receipt Section Title */}
-            <Typography variant="h6" gutterBottom>
-              Receipts
-            </Typography>
-
-            {/* Receipts */}
-            {claimData.receipts.map((receipt, index) => (
-              <React.Fragment key={index}>
-                <Box  display="flex" flexDirection="column" gap={2}>
-                  <Box display="flex" gap={2} alignItems="center">
-                    {/* <Box display="inline-flex"> */}
-                      <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                          sx={{ minWidth: "40%" }}
-                          label="Date"
-                          value={receipt.date ? dayjs(receipt.date, 'DD/MM/YYYY') : null}
-                          maxDate={currentDate}
-                          onChange={(newValue) => {
-                            handleReceiptChange(index, 'date', newValue ? newValue.format('DD/MM/YYYY') : '');
-                          }}
-                          format="DD/MM/YYYY"
-                          slotProps={{
-                            textField: {
-                              required: true,
-                            },
-                          }}
-                          // renderInput={(params) => <TextField {...params} />}
-                        />
-
-                      </LocalizationProvider>
-                    {/* </Box> */}
-                    <TextField
-                      required
-                      label="Amount (RM)"
-                      type="number"
-                      fullWidth
-                      value={receipt.amount}
-                      onChange={(e) => handleReceiptChange(index, 'amount', e.target.value)}
-                    />
-                    <IconButton onClick={() => removeReceipt(index)} disabled={claimData.receipts.length === 1}>
-                      <RemoveCircleOutline />
-                    </IconButton>
-                  </Box>
-                  <Box>
-                    <Button variant="outlined" component="label" fullWidth>
-                      {receipt.file ? `File: ${receipt.file.name}` : "Receipt Image or PDF"}
-                      <input
-                        required
-                        type="file"
-                        hidden
-                        onChange={(e) =>
-                          handleReceiptChange(index, 'file', e.target.files?.[0] || null)
-                        }
-                      />
-                    </Button>
-                  </Box>  
-                  <Box>
-                    <TextField
-                      required
-                      label="Description"
-                      fullWidth
-                      multiline
-                      rows={4} // Set the number of visible rows
-                      value={receipt.description}
-                      onChange={(e) => handleReceiptChange(index, 'description', e.target.value)}
-                    />
-                  </Box>
-                </Box>
-                {/* Add a Divider between receipts */}
-                {index < claimData.receipts.length - 1 && <Divider sx={{ my: 2 }} />}
-              </React.Fragment>
-            ))}
-
-            <Button startIcon={<AddCircleOutline />} onClick={addReceipt}>
-              Add Receipt
-            </Button>
-            <Typography variant="subtitle1" fontWeight="bold" alignSelf="flex-end" mt={2}>
-              Total Amount (RM): {claimData.totalAmount.toFixed(2)}
-            </Typography>
-
-          </Box>
-        </DialogContent>
-
+        <ClaimForm
+          data={claimData}
+          onChange={handleChange}
+          onReceiptChange={handleReceiptChange}
+          onFileChange={(index, file) => handleReceiptChange(index, 'file', file)}
+          addReceipt={addReceipt}
+          removeReceipt={removeReceipt}
+          
+        />
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
           <Button type='submit' variant="contained">
@@ -417,50 +292,18 @@ export default function ClaimPage() {
         </DialogActions>
       </Dialog>
       {/* Confirmation and Success Dialog */}
-      <Dialog open={openDialog} onClose={handleDialogClose}>
-        {dialogState === 'confirm' && (
-          <>
-            <DialogTitle>Confirm Submit</DialogTitle>
-            <DialogContent>
-              <Typography>
-                Are you sure you want to submit the claim? 
-                <br />
-                Total Amount: RM {claimData.totalAmount.toFixed(2)}
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-              <Button onClick={handleConfirmSubmit} variant="contained" color="primary">
-                Confirm
-              </Button>
-            </DialogActions>
-          </>
-        )}
+      <ClaimDialog
+        open={openDialog}
+        state={dialogState}
+        onCancel={() => setOpenDialog(false)}
+        onConfirm={handleConfirmSubmit}
+        onCloseSuccess={resetDialog} // Add this line
+        claimId={claimData.claimId}
+        totalAmount={claimData.totalAmount}
+        receiptCount={claimData.receiptCount}
+        />
 
-        {dialogState === 'loading' && (
-          <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <CircularProgress />
-            <Typography sx={{ ml: 2 }}>Submitting...</Typography>
-          </DialogContent>
-        )}
-        {dialogState === 'success' && (
-          <>
-            <DialogTitle>Success</DialogTitle>
-            <DialogContent>
-              <Typography>
-                Your claim has been successfully submitted!
-                <br />
-                Your Claim ID is {claimData.claimId}. Please keep it for your records.
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose} variant="contained" color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+      
     </>
   );
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, Box, CircularProgress, LinearProgress, MenuItem
+  DialogActions, TextField, Box, CircularProgress, LinearProgress, MenuItem, Card, CardContent
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -12,6 +12,9 @@ import { db } from '../firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import dayjs from 'dayjs';
 import submitIncident from '../Submit/SubmitIncident';
+import IncidentDialog from '../components/IncidentDialog';
+import IncidentFrom   from '../components/IncidentForm';
+import IncidentForm from '../components/IncidentForm';
 
 export default function IncidentPage() {
   const { session, loading } = useSession();
@@ -19,55 +22,96 @@ export default function IncidentPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success'>('confirm');
   const [bankInfo, setBankInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<any>(null);
+  const [teamInfo, setTeamInfo] = useState<any>(null);
 
   const [incidentData, setIncidentData] = useState({
     incidentId: '',
-    unit: '',
     invoiceNum: '',
+    email: session?.user?.email || '',
+    userName: userInfo?.shortName || '',
+    unit: '',
+    dept: '',
+    phoneNum: '',
     responsibleName: '',
     responsibleDept: '',
     description: '',
     impact: '',
     date: '',
     file: null as File | null,
-    email: session?.user?.email || '',
   });
 
   useEffect(() => {
-      const fetchBankInfo = async () => {
-        if (session?.user?.email) {
-          const bankRef = doc(db, 'bankinfo', session.user.email);
-          const bankDoc = await getDoc(bankRef);
-          if (bankDoc.exists()) {
-            setBankInfo(bankDoc.data());
-          } else {
-            setBankInfo(null); // No bank info found
-          }
+    const fetchInfo = async () => {
+      if (session?.user?.email) {
+        const bankRef = doc(db, 'bankinfo', session.user.email);
+        const userRef = doc(db, 'users', session.user.email);
+        const teamRef = doc(db, 'teaminfo', session.user.email);
+        const bankDoc = await getDoc(bankRef);
+        const userDoc = await getDoc(userRef);
+        const teamDoc = await getDoc(teamRef);
+        if (bankDoc.exists()) {
+          setBankInfo(bankDoc.data());
+        } else {
+          setBankInfo(null); // No bank info found
         }
-      };
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setUserInfo(data);
+          console.log(data);
+          setIncidentData(prev => ({
+            ...prev,
+            userName: data.shortName || '', // Assuming shortName is the field for user's name
+            phoneNum: data.phoneNum || '', // Assuming phoneNum is the field for user's phone number
+          }));
+        } else {
+          setUserInfo(null); // No bank info found
+        }
+        if (teamDoc.exists()) {
+          setTeamInfo(teamDoc.data());
+        } else {
+          setTeamInfo(null); // No team info found
+        }
+      }
+    };
   
-      fetchBankInfo();
-    }, [session?.user?.email]);
+    fetchInfo();
+  }, [session?.user?.email]);
+
+  
+
+  
+  
+  const handleOpen = () => {
+    if (!bankInfo || !userInfo || !teamInfo) {
+      alert('Please update your personal information before submitting a claim.');
+      return;
+    }
+    setOpen(true);
+  };
 
   if (loading) return <LinearProgress />;
   if (!session) return <Navigate to="/sign-in" />;
 
   const resetDialog = () => {
     setDialogState('confirm');
-    setOpenDialog(false)
-    setOpen(false)
+    setOpenDialog(false);
+    setOpen(false);
     setIncidentData({
       incidentId: '',
-      unit: '',
       invoiceNum: '',
+      email: session?.user?.email || '',
+      userName: userInfo?.shortName || '',
+      unit: '',
+      dept: '',
+      phoneNum: '',
       responsibleName: '',
       responsibleDept: '',
       description: '',
       impact: '',
-      date: '',
+      date: incidentData?.date,
       file: null,
-      email: session?.user?.email || '',
-    }); // Reset the form fields// optional: reset ticket ID
+    });
   };
 
   const handleChange = (field: string, value: any) => {
@@ -93,6 +137,7 @@ export default function IncidentPage() {
   };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    console.log(incidentData);
     e.preventDefault();
     if (validateForm()) {
       setOpenDialog(true);
@@ -121,130 +166,25 @@ export default function IncidentPage() {
 
   return (
     <>
-      <Button variant="contained" onClick={() => setOpen(true)}>
+      <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
+        <CardContent>
+          <Typography variant="body1" color="text.secondary">
+            This page allows you to submit an <strong>incident report</strong>. 
+            Please fill out the form by clicking on the button and upload the necessary details.
+          </Typography>
+        </CardContent>
+      </Card>
+      <Button variant="contained" onClick={handleOpen}>
         Submit Incident Report
       </Button>
 
       <Dialog component="form" open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
         <DialogTitle>Submit Incident Report</DialogTitle>
-        <DialogContent dividers>
-          <Box display="flex" flexDirection="column" gap={2} mt={2}>
-
-            <TextField
-              label="Business Unit"
-              select
-              fullWidth
-              value={incidentData.unit}
-              onChange={(e) => handleChange('unit', e.target.value)}
-              required
-            >
-              <MenuItem value="UTOPIA HOLIDAY SDN BHD">UTOPIA HOLIDAY SDN BHD</MenuItem>
-              <MenuItem value="SCAFFOLDING MALAYSIA SDN BHD">SCAFFOLDING MALAYSIA SDN BHD</MenuItem>
-              <MenuItem value="IBNU SINA CARE SDN BHD">IBNU SINA CARE SDN BHD</MenuItem>
-              <MenuItem value="REV MOVE SDN BHD">REV MOVE SDN BHD</MenuItem>
-              <MenuItem value="REV MOVE UTARA SDN BHD">REV MOVE UTARA SDN BHD</MenuItem>
-              <MenuItem value="KAK KENDURI SDN BHD">KAK KENDURI SDN BHD</MenuItem>
-              <MenuItem value="ENCIK BEKU AIRCOND SDN BHD">ENCIK BEKU AIRCOND SDN BHD</MenuItem>
-              <MenuItem value="BUTIK GLAM & LUX SDN BHD">BUTIK GLAM & LUX SDN BHD</MenuItem>
-              <MenuItem value="PULSE PIALTES SDN BHD">PULSE PIALTES SDN BHD</MenuItem>
-              <MenuItem value="ANJAKAN STRATEGIK SDN BHD">ANJAKAN STRATEGIK SDN BHD</MenuItem>
-              <MenuItem value="MIMPIAN ASTAKA SDN BHD">MIMPIAN ASTAKA SDN BHD</MenuItem>
-              <MenuItem value="MEKAR BUDI SDN BHD">MEKAR BUDI SDN BHD</MenuItem>
-              <MenuItem value="MUTIARA EMBUN SDN BHD">MUTIARA EMBUN SDN BHD</MenuItem>
-              <MenuItem value="MERRY ELDERLY CARE SDN BHD">MERRY ELDERLY CARE SDN BHD</MenuItem>
-              <MenuItem value="COLD TRUCK MALAYSIA SDN BHD">COLD TRUCK MALAYSIA SDN BHD</MenuItem>
-              <MenuItem value="MOBILE WHEELER SDN BHD">MOBILE WHEELER SDN BHD</MenuItem>
-            </TextField>
-
-            <TextField
-              label="Invoice Number"
-              fullWidth
-              value={incidentData.invoiceNum}
-              onChange={(e) => handleChange('invoiceNum', e.target.value)}
-              required
-            />
-
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-
-                sx={{ minWidth: "40%" }}
-                label="Date"
-                value={incidentData.date ? dayjs(incidentData.date, 'DD/MM/YYYY') : null}
-                maxDate={dayjs()}
-                onChange={(newValue) => handleChange('date', newValue ? newValue.format('DD/MM/YYYY') : '')}
-                format='DD/MM/YYYY'
-                slotProps={{
-                  textField: {
-                    required: true,
-                  },
-                }}
-              />
-            </LocalizationProvider>
-
-            <TextField
-              label="Responsible Department"
-              fullWidth
-              value={incidentData.responsibleDept}
-              onChange={(e) => handleChange('responsibleDept', e.target.value)}
-            />
-
-            <TextField
-              label="Responsible Person"
-              fullWidth
-              value={incidentData.responsibleName}
-              onChange={(e) => handleChange('responsibleName', e.target.value)}
-            />
-            <Typography>
-              Incident Details
-            </Typography>
-            <Box>
-              <Button variant="outlined" component="label" fullWidth>
-
-                {incidentData.file ? `File: ${incidentData.file.name}` : "Incident Image or PDF"}
-                <input
-                  
-                  accept="image/*,application/pdf"
-                  type="file"
-                  hidden
-                  
-                  onChange={handleFileChange}
-                />
-              </Button>
-            </Box> 
-
-            <TextField
-              label="Description"
-              fullWidth
-              multiline
-              rows={4}
-              value={incidentData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              required
-            />
-
-            <TextField
-              label="Impact"
-              fullWidth
-              multiline
-              rows={2}
-              value={incidentData.impact}
-              onChange={(e) => handleChange('impact', e.target.value)}
-              
-            />
-            
-
-            {/* <Button variant="contained" component="label">
-              Upload File
-              <input type="file" hidden onChange={handleFileChange} />
-            </Button>
-            {incidentData.file && (
-              <Typography variant="body2" mt={1}>
-                Selected File: {incidentData.file.name}
-              </Typography>
-            )} */}
-
-          </Box>
-        </DialogContent>
+        <IncidentForm 
+              data={incidentData} 
+              onChange={handleChange} 
+              onFileChange={handleFileChange} 
+          />
 
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
@@ -254,51 +194,16 @@ export default function IncidentPage() {
         </DialogActions>
       </Dialog>
 
-      {/* Confirm and Status Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        {dialogState === 'confirm' && (
-          <>
-            <DialogTitle>Confirm Submit</DialogTitle>
-            <DialogContent>
-              <Typography>Are you sure you want to submit this incident report?</Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
-              <Button onClick={handleConfirmSubmit} variant="contained" color="primary">
-                Confirm
-              </Button>
-            </DialogActions>
-          </>
-        )}
+      
 
-        {dialogState === 'loading' && (
-          <DialogContent sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            <CircularProgress />
-            <Typography sx={{ ml: 2 }}>Submitting...</Typography>
-          </DialogContent>
-        )}
-
-        {dialogState === 'success' && (
-          <>
-            <DialogTitle>Success</DialogTitle>
-            <DialogContent>
-              <Typography>
-                Your incident report has been successfully submitted!
-                <br />
-                Your Ticket ID is {incidentData.incidentId}.
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button 
-                onClick={() => {
-                  resetDialog();
-                }} variant="contained" color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </>
-        )}
-      </Dialog>
+      <IncidentDialog
+        open={openDialog}
+        state={dialogState}
+        onCancel={() => setOpenDialog(false)}
+        onConfirm={handleConfirmSubmit}
+        onCloseSuccess={resetDialog}
+        ticketId={incidentData.incidentId}
+      />
     </>
   );
 }

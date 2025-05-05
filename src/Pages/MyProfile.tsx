@@ -10,7 +10,11 @@ import {
   DialogContent,
   DialogActions,
   CircularProgress,
+  Autocomplete,
+  Checkbox,
 } from '@mui/material';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import { Navigate, useLocation } from 'react-router';
 import { useSession } from '../SessionContext';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
@@ -22,9 +26,26 @@ export default function MyProfile() {
   const location = useLocation();
   const [userData, setUserData] = useState<any>(null);
   const [bankInfo, setBankInfo] = useState<any>(null);
+  const [teamInfo, setTeamInfo] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success'>('confirm');
+
+  const [errors, setErrors] = useState<any>({});
+
+  const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+  const checkedIcon = <CheckBoxIcon fontSize="small" />;
+  const units = [
+    "UTOPIA HOLIDAY SDN BHD", "SCAFFOLDING MALAYSIA SDN BHD (SMB)", "IBNU SINA CARE SDN BHD",
+    "REV MOVE SDN BHD (RMB)", "REV MOVE UTARA SDN BHD (RMU)", "KAK KENDURI SDN BHD (KMB)",
+    "ENCIK BEKU AIRCOND SDN BHD", "BUTIK GLAM & LUX SDN BHD", "PULSE PIALTES SDN BHD",
+    "ANJAKAN STRATEGIK SDN BHD", "MIMPIAN ASTAKA SDN BHD", "MEKAR BUDI SDN BHD",
+    "MUTIARA EMBUN SDN BHD", "MERRY ELDERLY CARE SDN BHD", "COLD TRUCK MALAYSIA SDN BHD",
+    "MOBILE WHEELER SDN BHD", "OTHER"
+  ];
+  const depts = [
+    "Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter"
+  ];
 
   if (loading) {
     return <LinearProgress />;
@@ -45,8 +66,13 @@ export default function MyProfile() {
         const bankRef = doc(db, 'bankinfo', user.email);
         const bankDoc = await getDoc(bankRef);
 
+        const teamRef = doc(db, 'teaminfo', user.email);
+        const teamDoc = await getDoc(teamRef);
+
         setUserData(userDoc.exists() ? userDoc.data() : {});
         setBankInfo(bankDoc.exists() ? bankDoc.data() : {});
+        setTeamInfo(teamDoc.exists() ? teamDoc.data() : {});
+
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -63,7 +89,35 @@ export default function MyProfile() {
     setBankInfo({ ...bankInfo, [e.target.name]: e.target.value });
   };
 
+  const handleTeamChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTeamInfo({ ...teamInfo, [e.target.name]: e.target.value });
+  };
+  
+  const validateFields = () => {
+    const newErrors: any = {};
+
+    if (!userData.fullName) newErrors.fullName = true;
+    if (!userData.icNum) newErrors.icNum = true;
+    if (!userData.phoneNum) newErrors.phoneNum = true;
+    if (!bankInfo.bankHolder) newErrors.bankHolder = true;
+    if (!bankInfo.bankName) newErrors.bankName = true;
+    if (!bankInfo.bankNum) newErrors.bankNum = true;
+    if (!teamInfo.units || teamInfo.units.length === 0) newErrors.units = true;
+    if (!teamInfo.depts || teamInfo.depts.length === 0) newErrors.depts = true;
+    if (!teamInfo.position) newErrors.position = true;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSave = async () => {
+
+    if (!validateFields()) {
+      alert('Please fill in all required fields.');
+      setOpenDialog(false); // close dialog if fields are invalid
+      return;
+    }
+
     setDialogState('loading');
     try {
       if (userData) {
@@ -71,6 +125,9 @@ export default function MyProfile() {
       }
       if (bankInfo) {
         await setDoc(doc(db, 'bankinfo', user.email), bankInfo, { merge: true });
+      }
+      if (teamInfo) {
+        await setDoc(doc(db, 'teaminfo', user.email), teamInfo, { merge: true });
       }
 
       if (userData && bankInfo) {
@@ -114,14 +171,15 @@ export default function MyProfile() {
   return (
     <div>
       <Box component="form" sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        <Typography variant="h6">User Information</Typography>
+        <Typography variant="h6">Personal Information</Typography>
         <TextField
           label="Full Name"
           name="fullName"
           value={userData?.fullName || ''}
           onChange={handleUserChange}
           fullWidth
-          helperText="e.g. JOHN DOE"
+          required
+          helperText="e.g. MUHAMMAD ALI BIN ABU BAKAR"
         />
         <TextField
           label="Short Name"
@@ -129,6 +187,7 @@ export default function MyProfile() {
           value={userData?.shortName || ''}
           onChange={handleUserChange}
           fullWidth
+          helperText="e.g. ALI"
         />
         <TextField
           label="Email"
@@ -139,7 +198,7 @@ export default function MyProfile() {
           disabled
         />
         <TextField
-          label="IC No."
+          label="IC No. / Passport No."
           name="icNum"
           value={userData?.icNum || ''}
           onChange={handleUserChange}
@@ -153,6 +212,66 @@ export default function MyProfile() {
           onChange={handleUserChange}
           fullWidth
           helperText="e.g. 60123456789"
+        />
+        <Typography variant="h6">Team Information</Typography>
+
+        <Autocomplete
+          multiple
+          options={units}
+          disableCloseOnSelect
+          getOptionLabel={(option) => option}
+          value={teamInfo.units || []}
+          onChange={(_, newValue) =>
+            setTeamInfo({ ...teamInfo, units: newValue })
+          }
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {option}
+            </li>
+          )}
+          style={{ width: '100%' }}
+          renderInput={(params) => (
+            <TextField {...params} label="Business Units" placeholder="Select units" />
+          )}
+        />
+        <Autocomplete
+          multiple
+          options={depts}
+          disableCloseOnSelect
+          getOptionLabel={(option) => option}
+          value={teamInfo.depts || []}
+          onChange={(_, newValue) =>
+            setTeamInfo({ ...teamInfo, depts: newValue })
+          }
+          renderOption={(props, option, { selected }) => (
+            <li {...props}>
+              <Checkbox
+                icon={icon}
+                checkedIcon={checkedIcon}
+                style={{ marginRight: 8 }}
+                checked={selected}
+              />
+              {option}
+            </li>
+          )}
+          style={{ width: '100%' }}
+          renderInput={(params) => (
+            <TextField {...params} label="Departments" placeholder="Select departments" />
+          )}
+        />
+        <TextField
+          label="Position"
+          name="position"
+          value={teamInfo?.position || ''}
+          onChange={handleTeamChange}
+          fullWidth
+          helperText="e.g. Executive"
         />
 
         <Typography variant="h6">Bank Information</Typography>
