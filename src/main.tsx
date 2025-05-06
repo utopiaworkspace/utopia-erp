@@ -13,6 +13,8 @@ import ClaimPage from './Pages/ClaimPage';
 import RMBList from './RMB/RMBList';
 import VehicleDashboardLayout from './Layout/RMBLayout';
 import RMBLayout from './Layout/RMBLayout';
+import RMBEvent from './RMB/RMBEvent';
+import VehicleEventDetails from './Pages/VehicleEventDetails';
 
 
 const router = createBrowserRouter([
@@ -62,7 +64,7 @@ const router = createBrowserRouter([
             ]
           },
           {
-            path: '/vehicles-rental/',
+            path: '/vehicles-dashboard/',
             Component: RMBDashboard,
             // children: [
             //   {
@@ -83,6 +85,22 @@ const router = createBrowserRouter([
             //   },
             // ]
           },
+          {
+            path: '/vehicles-events',
+            Component: RMBLayout,
+            children: [
+              {
+                index: true, 
+                Component: RMBEvent,
+              },  
+              {
+                path: ':vehicleEventId', // /vehicles/:vehicleId
+                // add component for detail view of vehicle event
+                Component: VehicleEventDetails,
+              },
+
+            ]
+          }
           
         ],
       },

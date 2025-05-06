@@ -57,23 +57,34 @@ export interface Vehicle extends DataModel {
 
 
 export const vehiclesDataSource: DataSource<Vehicle> = {
-    fields: [
-        { field: 'id', headerName: 'ID' },
-        { field: 'plateNumber', headerName: 'Plate Number', flex: 1 },
-        { field: 'location', headerName: 'Location', flex: 1 },
-        { field: 'type', headerName: 'Type', flex: 1 },
-        { field: 'gps', headerName: 'GPS', type: 'boolean' },
-        {
-            field: 'roadTaxExpiry',
-            headerName: 'Road Tax Expiry',
-            type: 'date',
-            valueGetter: (params) => {
-              const expiry = params?.row?.roadTaxExpiry;
-              return expiry?.toDate ? expiry.toDate() : expiry ?? null;
-            },
-          },
-        { field: 'model', headerName: 'Model', flex: 1 },
-      ],
+  fields: [
+    { field: 'id', headerName: 'ID' },
+    { field: 'plateNumber', headerName: 'Plate Number', flex: 1 },
+    { field: 'location', headerName: 'Location', flex: 1 },
+    {
+      field: 'type',
+      headerName: 'Type',
+      flex: 1,
+      type: 'singleSelect',
+      valueOptions: ['Car', 'Bike', 'Truck'], // 👈 this is the dropdown list
+    },
+    {
+      field: 'gps',
+      headerName: 'GPS',
+      type: 'boolean',
+    },
+    {
+      field: 'roadTaxExpiry',
+      headerName: 'Road Tax Expiry',
+      type: 'date',
+      valueGetter: (params) => {
+        const expiry = params?.row?.roadTaxExpiry;
+        return expiry?.toDate ? expiry.toDate() : expiry ?? null;
+      },
+    },
+    { field: 'model', headerName: 'Model', flex: 1 },
+  ],
+  
       
   
     // getMany: async ({ paginationModel, filterModel, sortModel }) => {

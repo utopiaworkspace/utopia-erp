@@ -11,6 +11,7 @@ import { Outlet, useNavigate } from 'react-router';
 import type { Navigation } from '@toolpad/core';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import CarRentalIcon from '@mui/icons-material/CarRental';
+import EventIcon from '@mui/icons-material/Event';
 import {
   firebaseSignOut,
   signInWithGoogle,
@@ -42,18 +43,24 @@ const NAVIGATION: Navigation = [
     title: 'My Profile',
     icon: <AccountCircleIcon />,
   },
-  // {
-  //   segment: 'vehicles',
-  //   title: 'Vehicles',
-  //   icon: <TwoWheelerIcon />,
-  //   // pattern: 'vehicles{/:vehiclesId}*',
-  // },
-  // {
-  //   segment: 'vehicles-rental',
-  //   title: 'Vehicles Rental',
-  //   icon: <CarRentalIcon />,
+  {
+    segment: 'vehicles',
+    title: 'Vehicles',
+    icon: <TwoWheelerIcon />,
+    // pattern: 'vehicles{/:vehiclesId}*',
+  },
+  {
+    segment: 'vehicles-dashboard',
+    title: 'Vehicles Dashboard',
+    icon: <CarRentalIcon />,
 
-  // },
+  },
+  {
+    segment: 'vehicles-events',
+    title: 'Vehicles Events',
+    icon: <EventIcon />,
+
+  },
 ];
 
 const BRANDING = {
