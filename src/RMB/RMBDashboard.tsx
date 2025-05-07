@@ -8,7 +8,7 @@ import {
   Typography,
   Box,
 } from '@mui/material';
-import { onSnapshot, collection } from 'firebase/firestore';
+import { onSnapshot, collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig'; // adjust path to your Firebase config
 import { useSession } from '../SessionContext';
 
@@ -29,16 +29,34 @@ const columns: GridColDef[] = [
     flex: 1,
   },
   { field: 'model', headerName: 'Model', flex: 1 },
+  { field: 'status', headerName: 'Status', flex: 1  },
 ];
 
 export default function RMBDashboard() {
   const apiRef = useGridApiRef();
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'vehicles'), (snapshot) => {
-      const vehicleRows = snapshot.docs.map((doc) => {
+  // Realtime sync on vehicles
+useEffect(() => {
+  const unsubscribeVehicles = onSnapshot(collection(db, 'vehicles'), (vehicleSnapshot) => {
+    // On every vehicle update, also get latest events ONCE
+    getDocs(collection(db, 'vehicle_event')).then(eventSnapshot => {
+      const events = eventSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const today = new Date();
+
+      const vehicleRows = vehicleSnapshot.docs.map((doc) => {
         const data = doc.data();
+        // statusses for order - available, reserved, ready-pickup, rented, 
+        // stasusses for service - available, reserved, in-service, ready-pickup, 
+      
+        const isOccupied = events.some(event => {
+          const matchesPlate = event.plateNum === data.plateNumber;
+          const isOrder = event.type_event === 'order';
+          const startDate = new Date(event.startDate);
+          const endDate = new Date(event.endDate);
+
+          return matchesPlate && isOrder && startDate <= today && today <= endDate;
+        });
 
         return {
           id: doc.id,
@@ -48,16 +66,18 @@ export default function RMBDashboard() {
           gps: data.gps ?? false,
           roadTaxExpiry: data.roadTaxExpiry ?? null,
           model: data.model ?? '',
+          status: isOccupied ? 'occupied' : 'available',
         };
       });
-      console.log('Vehicle Rows:', vehicleRows); // Debugging line
 
       apiRef.current.setRows(vehicleRows);
       setLoading(false);
     });
+  });
 
-    return () => unsubscribe();
-  }, [apiRef]);
+  return () => unsubscribeVehicles();
+}, [apiRef]);
+
 
   return (
     <>

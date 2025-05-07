@@ -93,7 +93,7 @@ export default function RMBEvent() {
   // Handle row click to navigate to the details page
   const handleRowClick = (params: any) => {
     const eventId = params.row.id; // Get the ID of the clicked row
-    navigate(`/vehicles-events/${eventId}`); // Navigate to the details page
+    navigate(`/rmb/vehicles-events/${eventId}`); // Navigate to the details page
   };
 
   return (

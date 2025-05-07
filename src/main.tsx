@@ -41,66 +41,51 @@ const router = createBrowserRouter([
             path: '/my-profile',
             Component: MyProfile,
           },
-          {
-            path: '/vehicles/',
-            Component: RMBLayout,
-            children: [
-              {
-                index: true, 
-                Component: RMBList,
-              },  
-              {
-                path: 'new', // /vehicles/new
-                Component: RMBList,
-              },
-              {
-                path: ':vehicleId', // /vehicles/:vehicleId
-                Component: RMBList,
-              },
-              {
-                path: ':vehicleId/edit', // /vehicles/:vehicleId/edit
-                Component: RMBList,
-              },
-            ]
-          },
-          {
-            path: '/vehicles-dashboard/',
-            Component: RMBDashboard,
-            // children: [
-            //   {
-            //     index: true, 
-            //     Component: RMBList,
-            //   },  
-            //   {
-            //     path: 'new', // /vehicles/new
-            //     Component: RMBList,
-            //   },
-            //   {
-            //     path: ':vehicleId', // /vehicles/:vehicleId
-            //     Component: RMBList,
-            //   },
-            //   {
-            //     path: ':vehicleId/edit', // /vehicles/:vehicleId/edit
-            //     Component: RMBList,
-            //   },
-            // ]
-          },
-          {
-            path: '/vehicles-events',
-            Component: RMBLayout,
-            children: [
-              {
-                index: true, 
-                Component: RMBEvent,
-              },  
-              {
-                path: ':vehicleEventId', // /vehicles/:vehicleId
-                // add component for detail view of vehicle event
-                Component: VehicleEventDetails,
-              },
 
-            ]
-          }
+          {
+            path: '/rmb',
+            Component: RMBLayout,
+            children: [
+              {
+                path: 'vehicles',
+                children: [
+                  {
+                  index: true,
+                  Component: RMBList,
+                  },
+                  {
+                  path: 'new', // /vehicles/new
+                  Component: RMBList,
+                  },
+                  {
+                  path: ':vehicleId', // /vehicles/:vehicleId
+                  Component: RMBList,
+                  },
+                  {
+                  path: ':vehicleId/edit', // /vehicles/:vehicleId/edit
+                  Component: RMBList,
+                  },
+                ],
+              },
+              {
+                path: 'vehicles-dashboard', // /rmb/vehicles-dashboard
+                Component: RMBDashboard,
+              },
+              {
+                path: 'vehicles-events',
+                children: [
+                  {
+                    index: true,
+                    Component: RMBEvent,
+                  },
+                  {
+                    path: ':vehicleEventId', // /rmb/vehicles-events/:vehicleEventId
+                    Component: VehicleEventDetails,
+                  },
+                ],
+              },
+            ],
+          },
           
         ],
       },

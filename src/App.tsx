@@ -12,6 +12,7 @@ import type { Navigation } from '@toolpad/core';
 import TwoWheelerIcon from '@mui/icons-material/TwoWheeler';
 import CarRentalIcon from '@mui/icons-material/CarRental';
 import EventIcon from '@mui/icons-material/Event';
+import FeaturedPlayListIcon from '@mui/icons-material/FeaturedPlayList';
 import {
   firebaseSignOut,
   signInWithGoogle,
@@ -29,6 +30,9 @@ const NAVIGATION: Navigation = [
     icon: <DashboardIcon />,
   },
   {
+    kind: 'divider',
+  },
+  {
     segment: 'claims',
     title: 'Claims',
     icon: <ReceiptLongIcon />,
@@ -44,23 +48,34 @@ const NAVIGATION: Navigation = [
     icon: <AccountCircleIcon />,
   },
   {
-    segment: 'vehicles',
-    title: 'Vehicles',
+    kind: 'divider',
+  },
+  {
+    segment: 'rmb',
+    title: 'RMB',
     icon: <TwoWheelerIcon />,
-    // pattern: 'vehicles{/:vehiclesId}*',
+    children: [
+      {
+        segment: 'vehicles',
+        title: 'Vehicles',
+        icon: <FeaturedPlayListIcon />,
+        // pattern: 'vehicles{/:vehiclesId}*',
+      },
+      {
+        segment: 'vehicles-dashboard',
+        title: 'Vehicles Dashboard',
+        icon: <CarRentalIcon />,
+    
+      },
+      {
+        segment: 'vehicles-events',
+        title: 'Vehicles Events',
+        icon: <EventIcon />,
+    
+      },
+    ]
   },
-  {
-    segment: 'vehicles-dashboard',
-    title: 'Vehicles Dashboard',
-    icon: <CarRentalIcon />,
-
-  },
-  {
-    segment: 'vehicles-events',
-    title: 'Vehicles Events',
-    icon: <EventIcon />,
-
-  },
+  
 ];
 
 const BRANDING = {
