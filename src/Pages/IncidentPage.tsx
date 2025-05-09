@@ -83,7 +83,7 @@ export default function IncidentPage() {
   
   
   const handleOpen = () => {
-    if (!bankInfo || !userInfo || !teamInfo) {
+    if (!bankInfo || !userInfo) {
       alert('Please update your personal information before submitting a claim.');
       return;
     }
@@ -169,8 +169,9 @@ export default function IncidentPage() {
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
           <Typography variant="body1" color="text.secondary">
-            This page allows you to submit an <strong>incident report</strong>. 
-            Please fill out the form by clicking on the button and upload the necessary details.
+          Use this page to submit an <strong>incident report</strong>.
+          <br />
+          Click the button below to complete the form and provide all relevant details.
           </Typography>
         </CardContent>
       </Card>

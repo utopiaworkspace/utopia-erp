@@ -49,6 +49,7 @@ export default function ClaimPage() {
     fullName: '',
     email: user.email,
     phoneNumber: '',
+    icNum: '',
     totalAmount: 0,
     receiptCount: 0,
     receipts: [{ date: '', description: '', amount: '', file: null }]
@@ -71,6 +72,7 @@ export default function ClaimPage() {
           setUserInfo(userDoc.data());
           claimData.fullName = userDoc.data().fullName || ''; 
           claimData.phoneNumber = userDoc.data().phoneNum || ''; 
+          claimData.icNum = userDoc.data().icNum || '';
         } else {
           setUserInfo(null); // No bank info found
         }
@@ -89,7 +91,7 @@ export default function ClaimPage() {
   
 
   const handleOpen = () => {
-    if (!bankInfo || !userInfo || !teamInfo) {
+    if (!bankInfo || !userInfo) {
       alert('Please update your personal information before submitting a claim.');
       return;
     }
@@ -216,6 +218,7 @@ export default function ClaimPage() {
       fullName: userInfo?.fullName || '', // Use userInfo state to set the full name
       email: user.email,
       phoneNumber: userInfo?.phoneNum || '', // Use userInfo state to set the phone number
+      icNum: userInfo?.icNum || '', // Use userInfo state to set the IC number
       totalAmount: 0,
       receiptCount: 0,
       receipts: [{ date: '', description: '', amount: '', file: null }]
@@ -262,8 +265,9 @@ export default function ClaimPage() {
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
           <Typography variant="body1" color="text.secondary">
-            This page allows you to submit a claim for reimbursement. 
-            Please fill out the form by clicking on the button and upload the necessary receipts. The form covers both <strong>general</strong> claims and <strong>benefit</strong> claims.
+          Use this page to submit a reimbursement claim.
+          <br />
+          Click the button below to complete the form and upload any necessary receipts. The form accommodates both <strong>general</strong> and <strong>benefit</strong> claims.
           </Typography>
         </CardContent>
       </Card>

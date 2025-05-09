@@ -38,8 +38,9 @@ export default function DashboardPage() {
 
 
           <Typography variant="body1" sx={{ mt: 2 }}>
-            This system allows you to submit <strong>claims</strong> and <strong>incident reports</strong>.
-            Please navigate to the respective pages using the menu to begin.
+            This platform allows you to submit <strong>claims</strong> and <strong>incident reports</strong>.
+            <br />
+            Please use the menu to navigate to the appropriate page and begin the process.
           </Typography>
         </CardContent>
       </Card>

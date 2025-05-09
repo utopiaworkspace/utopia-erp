@@ -23,6 +23,7 @@ interface Props {
     unit: string;
     fullName: string;
     phoneNumber: string;
+    icNum: string;
     receipts: Receipt[];
     totalAmount: number;
   };
@@ -110,6 +111,15 @@ export default function ClaimForm({
         onChange={(e) => onChange('phoneNumber', e.target.value)}
         required
         helperText="e.g. 60123456789"
+      />
+
+      <TextField
+        label="IC Number/Passport Number"
+        fullWidth
+        value={data.icNum}
+        onChange={(e) => onChange('icNum', e.target.value)}
+        required
+        helperText="e.g. 021209-14-1234 or A12345678"
       />
 
       <Typography variant="h6" mt={3}>Receipts</Typography>
