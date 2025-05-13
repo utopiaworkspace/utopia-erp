@@ -130,10 +130,11 @@ export default function ClaimForm({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Receipt Date"
-                value={receipt.date ? dayjs(receipt.date, 'DD/MM/YYYY') : null}
+                value={receipt.date ? dayjs(receipt.date, 'DD-MM-YYYY') : null}
                 onChange={(date) =>
-                  onReceiptChange(index, 'date', date ? date.format('DD/MM/YYYY') : '')
+                  onReceiptChange(index, 'date', date ? date.format('DD-MM-YYYY') : '')
                 }
+                format='DD-MM-YYYY'
                 maxDate={dayjs()}
                 slotProps={{ textField: { required: true } }}
               />

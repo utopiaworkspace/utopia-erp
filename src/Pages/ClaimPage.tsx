@@ -50,6 +50,9 @@ export default function ClaimPage() {
     email: user.email,
     phoneNumber: '',
     icNum: '',
+    bankHolder: '',
+    bankName: '',
+    bankNum: '',
     totalAmount: 0,
     receiptCount: 0,
     receipts: [{ date: '', description: '', amount: '', file: null }]
@@ -65,6 +68,9 @@ export default function ClaimPage() {
         const teamDoc = await getDoc(teamRef);
         if (bankDoc.exists()) {
           setBankInfo(bankDoc.data());
+          claimData.bankHolder = bankDoc.data().bankHolder || '';
+          claimData.bankName = bankDoc.data().bankName || '';
+          claimData.bankNum = bankDoc.data().bankNum || '';
         } else {
           setBankInfo(null); // No bank info found
         }
@@ -219,6 +225,9 @@ export default function ClaimPage() {
       email: user.email,
       phoneNumber: userInfo?.phoneNum || '', // Use userInfo state to set the phone number
       icNum: userInfo?.icNum || '', // Use userInfo state to set the IC number
+      bankHolder: bankInfo?.bankHolder || '', // Use bankInfo state to set the bank holder
+      bankName: bankInfo?.bankName || '', // Use bankInfo state to set the bank name
+      bankNum: bankInfo?.bankNum || '', // Use bankInfo state to set the bank number
       totalAmount: 0,
       receiptCount: 0,
       receipts: [{ date: '', description: '', amount: '', file: null }]

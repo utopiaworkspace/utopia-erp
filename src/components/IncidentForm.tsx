@@ -19,7 +19,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
 
   useEffect(() => {
     if (!data.date) {
-      const todayStr = dayjs().format('DD/MM/YYYY');
+      const todayStr = dayjs().format('DD-MMYYYY');
       onChange('date', todayStr); // sets the value into parent/state
       setValue(dayjs()); // update local state as well
     }
@@ -128,8 +128,8 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
           label="Date of Incident"    
           value={value}
           maxDate={dayjs()}
-          onChange={(newValue) => onChange('date', newValue ? newValue.format('DD/MM/YYYY') : '')}
-          format='DD/MM/YYYY'
+          onChange={(newValue) => onChange('date', newValue ? newValue.format('DD-MM-YYYY') : '')}
+          format='DD-MM-YYYY'
           slotProps={{
             textField: { required: true },
           }}

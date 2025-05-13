@@ -11,8 +11,8 @@ import RMBDashboard from './RMB/RMBDashboard';
 import IncidentPage from './Pages/IncidentPage';
 import ClaimPage from './Pages/ClaimPage';
 import RMBList from './RMB/RMBList';
-import VehicleDashboardLayout from './Layout/RMBLayout';
-import RMBLayout from './Layout/RMBLayout';
+import VehicleDashboardLayout from './Layout/ChildLayout';
+import ChildLayout from './Layout/ChildLayout';
 import RMBEvent from './RMB/RMBEvent';
 import VehicleEventDetails from './Pages/VehicleEventDetails';
 
@@ -44,7 +44,7 @@ const router = createBrowserRouter([
 
           {
             path: '/rmb',
-            Component: RMBLayout,
+            Component: ChildLayout,
             children: [
               {
                 path: 'vehicles',
