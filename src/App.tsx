@@ -50,31 +50,31 @@ const NAVIGATION: Navigation = [
   {
     kind: 'divider',
   },
-  {
-    segment: 'rmb',
-    title: 'RMB',
-    icon: <TwoWheelerIcon />,
-    children: [
-      {
-        segment: 'vehicles',
-        title: 'Vehicles',
-        icon: <FeaturedPlayListIcon />,
-        // pattern: 'vehicles{/:vehiclesId}*',
-      },
-      {
-        segment: 'vehicles-dashboard',
-        title: 'Vehicles Dashboard',
-        icon: <CarRentalIcon />,
+  // {
+  //   segment: 'rmb',
+  //   title: 'RMB',
+  //   icon: <TwoWheelerIcon />,
+  //   children: [
+  //     {
+  //       segment: 'vehicles',
+  //       title: 'Vehicles',
+  //       icon: <FeaturedPlayListIcon />,
+  //       // pattern: 'vehicles{/:vehiclesId}*',
+  //     },
+  //     {
+  //       segment: 'vehicles-dashboard',
+  //       title: 'Vehicles Dashboard',
+  //       icon: <CarRentalIcon />,
     
-      },
-      {
-        segment: 'vehicles-events',
-        title: 'Vehicles Events',
-        icon: <EventIcon />,
+  //     },
+  //     {
+  //       segment: 'vehicles-events',
+  //       title: 'Vehicles Events',
+  //       icon: <EventIcon />,
     
-      },
-    ]
-  },
+  //     },
+  //   ]
+  // },
   
 ];
 

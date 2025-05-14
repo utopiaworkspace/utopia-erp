@@ -19,7 +19,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
 
   useEffect(() => {
     if (!data.date) {
-      const todayStr = dayjs().format('DD-MMYYYY');
+      const todayStr = dayjs().format('DD-MM-YYYY');
       onChange('date', todayStr); // sets the value into parent/state
       setValue(dayjs()); // update local state as well
     }
@@ -112,14 +112,42 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
           required
         />
       )}
+      <TextField
+        label="Incident Type"
+        select
+        fullWidth
+        value={data.incidentType}
+        onChange={(e) => onChange('incidentType', e.target.value)}
+        
+        
+        >
+        <MenuItem value="Internal Staff Issue">Internal Staff Issue</MenuItem>
+        <MenuItem value="Customer Complaint">Customer Complaint</MenuItem>
+        <MenuItem value="After Sales Service">After Sales Service</MenuItem>
 
+      </TextField>
+
+      <TextField
+        label="Severity Level"
+        select
+        fullWidth
+        value={data.severityLevel}
+        onChange={(e) => onChange('severityLevel', e.target.value)}
+        
+
+        >
+        <MenuItem value="Low">Low</MenuItem>
+        <MenuItem value="Medium">Medium</MenuItem>
+        <MenuItem value="High">High</MenuItem>
+
+      </TextField>
 
       <TextField
         label="Invoice Number"
         fullWidth
         value={data.invoiceNum}
         onChange={(e) => onChange('invoiceNum', e.target.value)}
-        required
+        
       />
 
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -141,6 +169,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         fullWidth
         select
         value={data.responsibleDept}
+        required
         onChange={(e) => onChange('responsibleDept', e.target.value)}
       >
         {["Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter"].map((dept) => (

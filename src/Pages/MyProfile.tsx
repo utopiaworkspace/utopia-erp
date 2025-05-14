@@ -242,9 +242,9 @@ export default function MyProfile() {
         <TextField
           select
           label="Department"
-          value={teamInfo.depts || ''}
+          value={teamInfo.dept || ''}
           onChange={(e) =>
-            setTeamInfo({ ...teamInfo, depts: e.target.value })
+            setTeamInfo({ ...teamInfo, dept: e.target.value })
           }
           placeholder="Select a department"
           fullWidth

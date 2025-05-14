@@ -5,11 +5,14 @@ import { handleIncidentID } from "./IncidentID"; // We will create this, similar
 export default async function submitIncident(incidentData: any) {
   try {
     incidentData.action = "submit_incident";
+    incidentData.source = "Webapp";
+    incidentData.createdAt = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
 
     // Generate incident ID
     const incidentId = await handleIncidentID();
     incidentData.incidentId = incidentId;
 
+    console.log(incidentData);
     // Convert file to Base64 if uploaded
     if (incidentData.file) {
       const base64 = await convertFileToBase64(incidentData.file);
