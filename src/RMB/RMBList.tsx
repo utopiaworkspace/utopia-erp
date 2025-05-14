@@ -57,23 +57,42 @@ export interface Vehicle extends DataModel {
 
 
 export const vehiclesDataSource: DataSource<Vehicle> = {
-    fields: [
-        { field: 'id', headerName: 'ID' },
-        { field: 'plateNumber', headerName: 'Plate Number', flex: 1 },
-        { field: 'location', headerName: 'Location', flex: 1 },
-        { field: 'type', headerName: 'Type', flex: 1 },
-        { field: 'gps', headerName: 'GPS', type: 'boolean' },
-        {
-            field: 'roadTaxExpiry',
-            headerName: 'Road Tax Expiry',
-            type: 'date',
-            valueGetter: (params) => {
-              const expiry = params?.row?.roadTaxExpiry;
-              return expiry?.toDate ? expiry.toDate() : expiry ?? null;
-            },
-          },
-        { field: 'model', headerName: 'Model', flex: 1 },
-      ],
+  
+  fields: [
+    { field: 'id', headerName: 'ID' },
+    { field: 'plateNumber', headerName: 'Plate Number', flex: 1 },
+    { 
+      field: 'location', 
+      headerName: 'Location', 
+      flex: 1,
+      type: 'singleSelect',
+      valueOptions: ['Bukit Bintang', 'Johor', 'Melaka', 'Penang'], // 👈 this is the dropdown list
+    },
+    {
+      field: 'type',
+      headerName: 'Type',
+      flex: 1,
+      type: 'singleSelect',
+      valueOptions: ['Car', 'Bike', 'Truck'], // 👈 this is the dropdown list
+    },
+    {
+      field: 'gps',
+      headerName: 'GPS',
+      type: 'boolean',
+    },
+    {
+      field: 'roadTaxExpiry',
+      headerName: 'Road Tax Expiry',
+      type: 'date',
+      valueGetter: (params) => {
+        const expiry = params?.row?.roadTaxExpiry;
+        return expiry?.toDate ? expiry.toDate() : expiry ?? null;
+      },
+    },
+    { field: 'model', headerName: 'Model', flex: 1 },
+    { field: 'mileage', headerName: 'Mileage', flex: 1 },
+  ],
+  
       
   
     // getMany: async ({ paginationModel, filterModel, sortModel }) => {
@@ -97,7 +116,7 @@ export const vehiclesDataSource: DataSource<Vehicle> = {
     //     itemCount: allDocs.length,
     //   };
     // },
-  
+    
     getMany: async ({ paginationModel, filterModel, sortModel }) => {
       // Simulate loading delay
       await new Promise((resolve) => {
@@ -224,7 +243,8 @@ export default function RMBList() {
     return undefined;
   }, [location.pathname]);
 
-  const rootPath = '/vehicles';
+  // Define the root path and other paths
+  const rootPath = '/rmb/vehicles';
   const listPath = rootPath;
   const showPath = `${rootPath}/:vehicleId`;
   const createPath = `${rootPath}/new`;
@@ -263,6 +283,7 @@ export default function RMBList() {
   const showVehicleId = matchPath(showPath, location.pathname);
   const editVehicleId = matchPath(editPath, location.pathname);
 
+  console.log('showVehicleId:', showVehicleId);
 
   return (
     

@@ -27,19 +27,21 @@ export default function IncidentPage() {
 
   const [incidentData, setIncidentData] = useState({
     incidentId: '',
+    incidentType: '',
+    severityLevel: 'Low',
     invoiceNum: '',
     email: session?.user?.email || '',
     userName: userInfo?.shortName || '',
     unit: '',
-    dept: '',
-    phoneNum: '',
+    dept: teamInfo?.dept || '',
+    phoneNum: userInfo?.phoneNum || '',
     responsibleName: '',
     responsibleDept: '',
     description: '',
     impact: '',
     date: '',
     file: null as File | null,
-  });
+    });
 
   useEffect(() => {
     const fetchInfo = async () => {
@@ -68,7 +70,13 @@ export default function IncidentPage() {
           setUserInfo(null); // No bank info found
         }
         if (teamDoc.exists()) {
-          setTeamInfo(teamDoc.data());
+          const data = teamDoc.data();
+          console.log(data);
+          setTeamInfo(data);
+          setIncidentData(prev => ({
+            ...prev,
+            dept: data.dept || '', // Assuming dept is the field for user's department
+          }));
         } else {
           setTeamInfo(null); // No team info found
         }
@@ -83,7 +91,7 @@ export default function IncidentPage() {
   
   
   const handleOpen = () => {
-    if (!bankInfo || !userInfo || !teamInfo) {
+    if (!bankInfo || !userInfo) {
       alert('Please update your personal information before submitting a claim.');
       return;
     }
@@ -100,11 +108,13 @@ export default function IncidentPage() {
     setIncidentData({
       incidentId: '',
       invoiceNum: '',
+      incidentType: '',
+      severityLevel: 'Low',
       email: session?.user?.email || '',
       userName: userInfo?.shortName || '',
       unit: '',
-      dept: '',
-      phoneNum: '',
+      dept: incidentData?.dept,
+      phoneNum: userInfo?.phoneNum || '',
       responsibleName: '',
       responsibleDept: '',
       description: '',
@@ -129,8 +139,8 @@ export default function IncidentPage() {
 
   const validateForm = () => {
     const { unit, invoiceNum, description, date } = incidentData;
-    if (!unit || !invoiceNum || !description || !date) {
-      alert('Please fill in all required fields.');
+    if (!date) {
+      alert('Please fill in the incident date.');
       return false;
     }
     return true;
@@ -169,8 +179,9 @@ export default function IncidentPage() {
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
           <Typography variant="body1" color="text.secondary">
-            This page allows you to submit an <strong>incident report</strong>. 
-            Please fill out the form by clicking on the button and upload the necessary details.
+          Use this page to submit an <strong>incident report</strong>.
+          <br />
+          Click the button below to complete the form and provide all relevant details.
           </Typography>
         </CardContent>
       </Card>

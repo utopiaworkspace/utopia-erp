@@ -11,8 +11,10 @@ import RMBDashboard from './RMB/RMBDashboard';
 import IncidentPage from './Pages/IncidentPage';
 import ClaimPage from './Pages/ClaimPage';
 import RMBList from './RMB/RMBList';
-import VehicleDashboardLayout from './Layout/RMBLayout';
-import RMBLayout from './Layout/RMBLayout';
+import VehicleDashboardLayout from './Layout/ChildLayout';
+import ChildLayout from './Layout/ChildLayout';
+import RMBEvent from './RMB/RMBEvent';
+import VehicleEventDetails from './Pages/VehicleEventDetails';
 
 
 const router = createBrowserRouter([
@@ -39,49 +41,50 @@ const router = createBrowserRouter([
             path: '/my-profile',
             Component: MyProfile,
           },
+
           {
-            path: '/vehicles/',
-            Component: RMBLayout,
+            path: '/rmb',
+            Component: ChildLayout,
             children: [
               {
-                index: true, 
-                Component: RMBList,
-              },  
-              {
-                path: 'new', // /vehicles/new
-                Component: RMBList,
+                path: 'vehicles',
+                children: [
+                  {
+                  index: true,
+                  Component: RMBList,
+                  },
+                  {
+                  path: 'new', // /vehicles/new
+                  Component: RMBList,
+                  },
+                  {
+                  path: ':vehicleId', // /vehicles/:vehicleId
+                  Component: RMBList,
+                  },
+                  {
+                  path: ':vehicleId/edit', // /vehicles/:vehicleId/edit
+                  Component: RMBList,
+                  },
+                ],
               },
               {
-                path: ':vehicleId', // /vehicles/:vehicleId
-                Component: RMBList,
+                path: 'vehicles-dashboard', // /rmb/vehicles-dashboard
+                Component: RMBDashboard,
               },
               {
-                path: ':vehicleId/edit', // /vehicles/:vehicleId/edit
-                Component: RMBList,
+                path: 'vehicles-events',
+                children: [
+                  {
+                    index: true,
+                    Component: RMBEvent,
+                  },
+                  {
+                    path: ':vehicleEventId', // /rmb/vehicles-events/:vehicleEventId
+                    Component: VehicleEventDetails,
+                  },
+                ],
               },
-            ]
-          },
-          {
-            path: '/vehicles-rental/',
-            Component: RMBDashboard,
-            // children: [
-            //   {
-            //     index: true, 
-            //     Component: RMBList,
-            //   },  
-            //   {
-            //     path: 'new', // /vehicles/new
-            //     Component: RMBList,
-            //   },
-            //   {
-            //     path: ':vehicleId', // /vehicles/:vehicleId
-            //     Component: RMBList,
-            //   },
-            //   {
-            //     path: ':vehicleId/edit', // /vehicles/:vehicleId/edit
-            //     Component: RMBList,
-            //   },
-            // ]
+            ],
           },
           
         ],

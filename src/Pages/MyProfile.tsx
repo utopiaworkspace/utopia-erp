@@ -12,6 +12,7 @@ import {
   CircularProgress,
   Autocomplete,
   Checkbox,
+  MenuItem,
 } from '@mui/material';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -102,9 +103,7 @@ export default function MyProfile() {
     if (!bankInfo.bankHolder) newErrors.bankHolder = true;
     if (!bankInfo.bankName) newErrors.bankName = true;
     if (!bankInfo.bankNum) newErrors.bankNum = true;
-    if (!teamInfo.units || teamInfo.units.length === 0) newErrors.units = true;
-    if (!teamInfo.depts || teamInfo.depts.length === 0) newErrors.depts = true;
-    if (!teamInfo.position) newErrors.position = true;
+   
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -240,31 +239,23 @@ export default function MyProfile() {
             <TextField {...params} label="Business Units" placeholder="Select units" />
           )}
         />
-        <Autocomplete
-          multiple
-          options={depts}
-          disableCloseOnSelect
-          getOptionLabel={(option) => option}
-          value={teamInfo.depts || []}
-          onChange={(_, newValue) =>
-            setTeamInfo({ ...teamInfo, depts: newValue })
+        <TextField
+          select
+          label="Department"
+          value={teamInfo.dept || ''}
+          onChange={(e) =>
+            setTeamInfo({ ...teamInfo, dept: e.target.value })
           }
-          renderOption={(props, option, { selected }) => (
-            <li {...props}>
-              <Checkbox
-                icon={icon}
-                checkedIcon={checkedIcon}
-                style={{ marginRight: 8 }}
-                checked={selected}
-              />
-              {option}
-            </li>
-          )}
-          style={{ width: '100%' }}
-          renderInput={(params) => (
-            <TextField {...params} label="Departments" placeholder="Select departments" />
-          )}
-        />
+          placeholder="Select a department"
+          fullWidth
+        >
+          {depts.map((dept) => (
+            <MenuItem key={dept} value={dept}>
+              {dept}
+            </MenuItem>
+          ))}
+        </TextField>
+
         <TextField
           label="Position"
           name="position"

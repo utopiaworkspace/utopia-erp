@@ -1,5 +1,5 @@
 export const ENDPOINTS = {
-  SUBMIT_CLAIM: `https://script.google.com/macros/s/AKfycbxn3k5YII8_ZelryzRlv0Sr_wlgcX5G2vqb-LDk4vhKrAkA35k8_hkG8JmeCcp29ft2/exec`,
-  SUBMIT_USERINFO: `https://script.google.com/macros/s/AKfycbxn3k5YII8_ZelryzRlv0Sr_wlgcX5G2vqb-LDk4vhKrAkA35k8_hkG8JmeCcp29ft2/exec`,
-  SUBMIT_INCIDENT: `https://script.google.com/macros/s/AKfycbzbxGXaO5jvmM5g1Z5eOWMymmYJ9_xjocdiJlEs9p8RLv2AJJzyNSNP0MzhcK5HRvml/exec`
+  SUBMIT_CLAIM: `https://script.google.com/macros/s/AKfycbzveL353IZTkULxrDNsityH1mjiPLvX8eNlBBN52cxkuueQbKBL3rz0wL0VQaqzvUvc/exec`,
+  SUBMIT_USERINFO: `https://script.google.com/macros/s/AKfycbzveL353IZTkULxrDNsityH1mjiPLvX8eNlBBN52cxkuueQbKBL3rz0wL0VQaqzvUvc/exec`,
+  SUBMIT_INCIDENT: `https://script.google.com/macros/s/AKfycbxee9XmEKqz254VGRtF7KqPDZE11Ma5p6wFg-IhD3CFzUbbZcecQh0u1V1QeeJlP-uk/exec`
 };

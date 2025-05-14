@@ -23,6 +23,7 @@ interface Props {
     unit: string;
     fullName: string;
     phoneNumber: string;
+    icNum: string;
     receipts: Receipt[];
     totalAmount: number;
   };
@@ -112,6 +113,15 @@ export default function ClaimForm({
         helperText="e.g. 60123456789"
       />
 
+      <TextField
+        label="IC Number/Passport Number"
+        fullWidth
+        value={data.icNum}
+        onChange={(e) => onChange('icNum', e.target.value)}
+        required
+        helperText="e.g. 021209-14-1234 or A12345678"
+      />
+
       <Typography variant="h6" mt={3}>Receipts</Typography>
 
       {data.receipts.map((receipt, index) => (
@@ -120,10 +130,11 @@ export default function ClaimForm({
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Receipt Date"
-                value={receipt.date ? dayjs(receipt.date, 'DD/MM/YYYY') : null}
+                value={receipt.date ? dayjs(receipt.date, 'DD-MM-YYYY') : null}
                 onChange={(date) =>
-                  onReceiptChange(index, 'date', date ? date.format('DD/MM/YYYY') : '')
+                  onReceiptChange(index, 'date', date ? date.format('DD-MM-YYYY') : '')
                 }
+                format='DD-MM-YYYY'
                 maxDate={dayjs()}
                 slotProps={{ textField: { required: true } }}
               />
