@@ -11,6 +11,7 @@ export default async function submitIncident(incidentData: any) {
     // Generate incident ID
     const incidentId = await handleIncidentID();
     incidentData.incidentId = incidentId;
+    incidentData.unit = incidentData.responsibleUnit; // ✅ 这样 Google Sheet 才会收到 unit 值
 
     console.log(incidentData);
     // Convert file to Base64 if uploaded

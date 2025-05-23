@@ -76,7 +76,7 @@ export default function ClaimForm({
       )}
 
       <TextField
-        label="Business Unit"
+        label="Company Name"
         select
         fullWidth
         value={data.unit}
@@ -101,7 +101,7 @@ export default function ClaimForm({
         value={data.fullName}
         onChange={(e) => onChange('fullName', e.target.value)}
         required
-        helperText="e.g. MUHAMMAD ALI BIN ABU BAKAR"
+        helperText="ℹ️ e.g. MUHAMMAD AHMAD BIN ABU BAKAR"
       />
 
       <TextField
@@ -110,7 +110,7 @@ export default function ClaimForm({
         value={data.phoneNumber}
         onChange={(e) => onChange('phoneNumber', e.target.value)}
         required
-        helperText="e.g. 60123456789"
+        helperText="ℹ️ Must start with 6, numbers only, no '-' symbol or spaces. e.g. 60123456789"
       />
 
       <TextField
@@ -119,7 +119,7 @@ export default function ClaimForm({
         value={data.icNum}
         onChange={(e) => onChange('icNum', e.target.value)}
         required
-        helperText="e.g. 021209-14-1234 or A12345678"
+        helperText="ℹ️ Numbers only, no '-' symbol or spaces. e.g. 021012145041 or A12345678"
       />
 
       <Typography variant="h6" mt={3}>Receipts</Typography>
@@ -144,8 +144,25 @@ export default function ClaimForm({
               label="Amount (RM)"
               type="number"
               value={receipt.amount}
-              onChange={(e) => onReceiptChange(index, 'amount', e.target.value)}
+              onChange={(e) => {
+                let value = e.target.value;
+                // 只允许大于等于1且最多两位小数，或空值
+                if (
+                  value === '' ||
+                  (/^\d+(\.\d{0,2})?$/.test(value) && Number(value) >= 1)
+                ) {
+                  onReceiptChange(index, 'amount', value);
+                }
+              }}
+              onBlur={(e) => {
+                let value = e.target.value;
+                if (value !== '' && !isNaN(Number(value))) {
+                  // 格式化为两位小数
+                  onReceiptChange(index, 'amount', Number(value).toFixed(2));
+                }
+              }}
               required
+              inputProps={{ min: 1, step: "0.01" }}
             />
 
             <IconButton
@@ -179,14 +196,32 @@ export default function ClaimForm({
             value={receipt.description}
             onChange={(e) => onReceiptChange(index, 'description', e.target.value)}
             required
-            helperText="e.g. Claim for Petrol - Meeting at Ibnu Sina Warehouse on xx/xx/xxxx"
+            helperText="ℹ️ e.g. Grab - Meeting at Ibnu Sina Warehouse on xx/xx/xxxx"
           />
 
           {index < data.receipts.length - 1 && <Divider />}
         </Box>
       ))}
 
-      <Button startIcon={<AddCircleOutline />} onClick={addReceipt}>
+      <Button
+        startIcon={<AddCircleOutline />}
+        onClick={addReceipt}
+        sx={{
+          mt: 1,
+          py: 1.2,
+          borderRadius: 2,
+          fontWeight: 600,
+          textTransform: 'none',
+          borderColor: 'primary.main',
+          color: 'primary.main',
+          border: '1px solid',
+          '&:hover': {
+            backgroundColor: 'primary.main',
+            color: '#fff',
+          },
+        }}
+        variant="outlined"
+      >
         Add Another Receipt
       </Button>
 

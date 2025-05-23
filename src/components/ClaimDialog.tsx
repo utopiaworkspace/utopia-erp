@@ -14,7 +14,15 @@ interface Props {
 
 export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseSuccess, claimId, totalAmount, receiptCount }: Props) {
   return (
-    <Dialog open={open} onClose={onCancel}>
+    <Dialog
+      open={open}
+      fullWidth
+      maxWidth="sm" // 或 "md"，更宽一点
+      onClose={(e, reason) => {
+        if (state === 'loading' || state === 'success') return;
+        onCancel();
+      }}
+    >
       {state === 'confirm' && (
         <>
           <DialogTitle>Confirm Submit</DialogTitle>
@@ -46,9 +54,27 @@ export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseS
           <DialogTitle>Success</DialogTitle>
           <DialogContent>
             <Typography>
-              Your claim has been successfully submitted!
+              ✅ Claim Submitted Successfully!
               <br />
-              Your Claim ID is {claimId}.
+              <br />
+              Your Claim ID is <strong>{claimId}.</strong>
+              <br />
+              <br />
+              <strong>📸 Please screenshot this page and keep a copy.</strong>
+              <br />
+              <br />
+              📌 Reminder:
+              <br />
+              Write your <strong>name</strong> and <strong>Claim ID</strong> on the original receipt.  
+              <br />
+              Submit the original receipt for processing.
+              <br />
+              - HR Department (benefit claim)
+              <br />
+              - Your Manager (general claim)
+              <br />
+              <br />
+              Claims without original receipts will not be approved.
             </Typography>
           </DialogContent>
           <DialogActions>

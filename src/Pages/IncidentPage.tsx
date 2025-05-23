@@ -13,7 +13,6 @@ import { doc, getDoc } from 'firebase/firestore';
 import dayjs from 'dayjs';
 import submitIncident from '../Submit/SubmitIncident';
 import IncidentDialog from '../components/IncidentDialog';
-import IncidentFrom   from '../components/IncidentForm';
 import IncidentForm from '../components/IncidentForm';
 
 export default function IncidentPage() {
@@ -179,9 +178,19 @@ export default function IncidentPage() {
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
           <Typography variant="body1" color="text.secondary">
-          Use this page to submit an <strong>incident report</strong>.
+          This page allows you to submit an incident report — like staff issues, customer complaints, or problems after a job is done and etc.
           <br />
-          Click the button below to complete the form and provide all relevant details.
+          <br />
+          📌 This is Phase 1 of our incident reporting system.
+          <br />
+          Currently, the system focuses on submission only, history and status tracking will be added soon.
+          <br />
+          <br />
+          Please choose the correct <strong>incident type & severity level</strong> before you submit.
+          <br />
+          Your report will be sent to the management team to follow up. 
+          <br />
+          This helps us solve problems faster and improve teamwork.
           </Typography>
         </CardContent>
       </Card>

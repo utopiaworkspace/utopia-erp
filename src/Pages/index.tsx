@@ -38,9 +38,25 @@ export default function DashboardPage() {
 
 
           <Typography variant="body1" sx={{ mt: 2 }}>
-            This platform allows you to submit <strong>claims</strong> and <strong>incident reports</strong>.
+            <strong>Welcome to Utopia's ERP Internal Platform 👋</strong>
             <br />
-            Please use the menu to navigate to the appropriate page and begin the process.
+            <br />
+            This platform is designed to streamline and enhance your experience with our internal processes.
+            <br /> 
+            <br />
+            You can now:
+            <br />
+            - Submit Reimbursement Claims
+            <br />
+            - Submit Incident Reports
+            <br />
+            <br />
+            ✅ Make sure to update your info in <strong>My Profile</strong>
+            <br />
+            It helps us process things faster and more accurately!
+            <br />
+            <br />
+            More features coming soon — stay tuned!
           </Typography>
         </CardContent>
       </Card>

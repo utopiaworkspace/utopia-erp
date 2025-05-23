@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  TextField, MenuItem, Button, Box, Typography
+  TextField, MenuItem, Button, Box, Typography, Divider
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -29,42 +29,18 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
   const [customUnit, setCustomUnit] = useState('');
 
   const units = [
-    "UTOPIA HOLIDAY SDN BHD", "SCAFFOLDING MALAYSIA SDN BHD (SMB)", "IBNU SINA CARE SDN BHD",
-    "REV MOVE SDN BHD (RMB)", "REV MOVE UTARA SDN BHD (RMU)", "KAK KENDURI SDN BHD (KMB)",
-    "ENCIK BEKU AIRCOND SDN BHD", "BUTIK GLAM & LUX SDN BHD", "PULSE PIALTES SDN BHD",
-    "ANJAKAN STRATEGIK SDN BHD", "MIMPIAN ASTAKA SDN BHD", "MEKAR BUDI SDN BHD",
-    "MUTIARA EMBUN SDN BHD", "MERRY ELDERLY CARE SDN BHD", "COLD TRUCK MALAYSIA SDN BHD",
-    "MOBILE WHEELER SDN BHD", "OTHER"
+    "Encik Beku", "Ibnu Sina", "SMB", "KMB", "RMB", "RMU", "OTHER"
   ];
   
   return (
-    <Box display="flex" flexDirection="column" gap={2} mt={2} padding={2}>
-      <Typography>Your Details</Typography>
+    <Box display="flex" flexDirection="column" gap={2} mt={1} padding={2}>
+      <Typography variant="h6">Your Information</Typography>
       <TextField
         label="Name"
         fullWidth
         value={data.userName || ''} // Assuming `data.userName` contains the user's name
         disabled
       />
-      <TextField
-        label="Business Unit"
-        select
-        fullWidth
-        value={data.unit}
-        onChange={(e) => onChange('unit', e.target.value)}
-        required
-      >
-        {[
-          "UTOPIA HOLIDAY SDN BHD", "SCAFFOLDING MALAYSIA SDN BHD (SMB)", "IBNU SINA CARE SDN BHD",
-          "REV MOVE SDN BHD (RMB)", "REV MOVE UTARA SDN BHD (RMU)", "KAK KENDURI SDN BHD (KMB)",
-          "ENCIK BEKU AIRCOND SDN BHD", "BUTIK GLAM & LUX SDN BHD", "PULSE PIALTES SDN BHD",
-          "ANJAKAN STRATEGIK SDN BHD", "MIMPIAN ASTAKA SDN BHD", "MEKAR BUDI SDN BHD",
-          "MUTIARA EMBUN SDN BHD", "MERRY ELDERLY CARE SDN BHD", "COLD TRUCK MALAYSIA SDN BHD",
-          "MOBILE WHEELER SDN BHD"
-        ].map((unit) => (
-          <MenuItem key={unit} value={unit}>{unit}</MenuItem>
-        ))}
-      </TextField>
       
       <TextField
         label="Your Department"
@@ -78,7 +54,9 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         ))}
       </TextField>
 
-      <Typography>Incident Details</Typography>
+      <Divider sx={{ my: 0.5 }} />
+
+      <Typography variant="h6" mt={2}>Incident Information</Typography>
       <TextField
         label="Business Unit"
         select
@@ -91,7 +69,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
             setCustomUnit('');
           }
         }}
-        required
+        required // 这里设置为必填
       >
         {units.map((unit) => (
           <MenuItem key={unit} value={unit}>
@@ -109,7 +87,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
             setCustomUnit(e.target.value); // ✅ only update local state
             // Don't call onChange here; keep 'responsibleUnit' = 'OTHER'
           }}
-          required
+          required // 这里设置为必填
         />
       )}
       <TextField
@@ -118,12 +96,13 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         fullWidth
         value={data.incidentType}
         onChange={(e) => onChange('incidentType', e.target.value)}
-        
+        required // 这里设置为必填
         
         >
         <MenuItem value="Internal Staff Issue">Internal Staff Issue</MenuItem>
         <MenuItem value="Customer Complaint">Customer Complaint</MenuItem>
-        <MenuItem value="After Sales Service">After Sales Service</MenuItem>
+        <MenuItem value="After Sales Service">After Sales Problem</MenuItem>
+        <MenuItem value="Other">Other</MenuItem>
 
       </TextField>
 
@@ -169,10 +148,10 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         fullWidth
         select
         value={data.responsibleDept}
-        required
+        required // 这里设置为必填
         onChange={(e) => onChange('responsibleDept', e.target.value)}
       >
-        {["Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter"].map((dept) => (
+        {["Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter", "Other"].map((dept) => (
           <MenuItem key={dept} value={dept}>{dept}</MenuItem>
         ))}
       </TextField>
@@ -182,13 +161,13 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         fullWidth
         value={data.responsibleName}
         onChange={(e) => onChange('responsibleName', e.target.value)}
-        helperText="e.g. MUHAMMAD ALI BIN ABU BAKAR"
+        helperText="ℹ️ e.g. Ahmad"
       />
 
       
 
       <Button variant="outlined" component="label" fullWidth>
-        {data.file ? `File: ${data.file.name}` : "Incident Image or PDF"}
+        {data.file ? `File: ${data.file.name}` : "Upload Incident Image or PDF"}
         <input
           accept="image/*,application/pdf"
           type="file"
@@ -198,24 +177,24 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
       </Button>
 
       <TextField
-        label="Description"
+        label="Description of Incident"
         fullWidth
         multiline
         rows={4}
         value={data.description}
         onChange={(e) => onChange('description', e.target.value)}
-        required
-        helperText="e.g. Sales team did not key in data into the prepared sheet"
+        required // 这里设置为必填
+        helperText="ℹ️ e.g. Indoor did not key in data into the prepared sheet"
       />
 
       <TextField
-        label="Impact"
+        label="Impact of Incident"
         fullWidth
         multiline
         rows={2}
         value={data.impact}
         onChange={(e) => onChange('impact', e.target.value)}
-        helperText="e.g. Finance cannot trace overdue payments and missed the opportunity to chase the rental"
+        helperText="ℹ️ e.g. Finance cannot trace overdue payments and missed the opportunity to chase the rental"
       />
     </Box>
   );

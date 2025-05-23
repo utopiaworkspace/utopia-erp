@@ -178,7 +178,7 @@ export default function MyProfile() {
           onChange={handleUserChange}
           fullWidth
           required
-          helperText="e.g. MUHAMMAD ALI BIN ABU BAKAR"
+          helperText="ℹ️ e.g. MUHAMMAD AHMAD BIN ABU BAKAR"
         />
         <TextField
           label="Short Name"
@@ -186,7 +186,7 @@ export default function MyProfile() {
           value={userData?.shortName || ''}
           onChange={handleUserChange}
           fullWidth
-          helperText="e.g. ALI"
+          helperText="ℹ️ e.g. Ahmad"
         />
         <TextField
           label="Email"
@@ -196,22 +196,27 @@ export default function MyProfile() {
           fullWidth
           disabled
         />
-        <TextField
+                <TextField
           label="IC No. / Passport No."
           name="icNum"
           value={userData?.icNum || ''}
           onChange={handleUserChange}
           fullWidth
-          helperText="e.g. 021121-10-9012"
+          helperText="ℹ️ Numbers only, no '-' symbol or spaces. e.g. 021012145041 or A12345678"
         />
+      
         <TextField
           label="Phone Number"
           name="phoneNum"
           value={userData?.phoneNum || ''}
           onChange={handleUserChange}
           fullWidth
-          helperText="e.g. 60123456789"
+          slotProps={{
+            input: { inputMode: 'numeric', pattern: '6[0-9]*' }
+        }}
+          helperText="ℹ️ Must start with 6, numbers only, no '-' symbol or spaces. e.g. 60123456789"
         />
+      
         <Typography variant="h6">Team Information</Typography>
 
         <Autocomplete
@@ -236,7 +241,7 @@ export default function MyProfile() {
           )}
           style={{ width: '100%' }}
           renderInput={(params) => (
-            <TextField {...params} label="Business Units" placeholder="Select units" />
+            <TextField {...params} label="Company Name" placeholder="Select company" />
           )}
         />
         <TextField
@@ -262,7 +267,7 @@ export default function MyProfile() {
           value={teamInfo?.position || ''}
           onChange={handleTeamChange}
           fullWidth
-          helperText="e.g. Executive"
+          helperText="ℹ️ e.g. Executive, Team Leader, Technician, Driver, etc."
         />
 
         <Typography variant="h6">Bank Information</Typography>
@@ -286,7 +291,7 @@ export default function MyProfile() {
           value={bankInfo?.bankNum || ''}
           onChange={handleBankChange}
           fullWidth
-          helperText="Without spaces. e.g. 123456789012"
+          helperText="ℹ️ Numbers only, no '-' symbol or spaces. e.g. 123456789012"
         />
 
         <Button

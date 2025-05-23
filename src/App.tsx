@@ -34,18 +34,18 @@ const NAVIGATION: Navigation = [
   },
   {
     segment: 'claims',
-    title: 'Claims',
-    icon: <ReceiptLongIcon />,
+    title: 'Claims', // Sidebar title
+    icon: <ReceiptLongIcon/>,
   },
   {
     segment: 'incidents',
-    title: 'Incident Management',
-    icon: <ReportIcon />,
+    title: 'Incident Report',
+    icon: <ReportIcon/>,
   },
   {
     segment: 'my-profile',
     title: 'My Profile',
-    icon: <AccountCircleIcon />,
+    icon: <AccountCircleIcon/>,
   },
   {
     kind: 'divider',
@@ -79,11 +79,13 @@ const NAVIGATION: Navigation = [
 ];
 
 const BRANDING = {
-  logo: <SentimentSatisfiedIcon sx={{ color: grey[800] }} />, // uses parent color
-  title: 'utopia',
+  logo: <img src="/utopia-logo.png" alt="Utopia Logo" style={{ height: 40 }} />,
+  title: 'Utopia',
 };
 
 const demoTheme = createTheme({
+// 这里的配置决定了全局配色、圆角、字体等
+
   cssVariables: {
     colorSchemeSelector: 'data-toolpad-color-scheme',
   },
@@ -92,21 +94,41 @@ const demoTheme = createTheme({
       palette: {
         mode: 'light',
         primary: {
-          main: grey[800], // dark grey for buttons/text
+          main: '#009688', // Utopia green
+          // previously using main: grey[800] // dark grey for buttons/text
         },
         secondary: {
-          main: grey[500], // medium grey
+          main: '#F57C00', // Utopia Orange
+          // previously using main: grey[500] // medium grey
         },
-      },
+        background: {
+          default: '#FFFFFF',
+          paper: '#F9F9F9',
+        },
+        text: {
+          primary: '#212121',
+          secondary: '#616161',
+        },
+      }
     },
     dark: {
       palette: {
         mode: 'dark',
         primary: {
-          main: grey[300], // light grey for contrast on dark bg
+          main: '#4DB6AC', // 暗色背景下的 Utopia Green 较浅色
+          // previosly using main: grey[300], // light grey for contrast on dark bg
         },
         secondary: {
-          main: grey[500],
+          main: '#FF9800', // 橙色点缀
+          // previously using main: grey[500],
+        },
+        background: {
+          default: '#121212',
+          paper: '#1E1E1E',
+        },
+        text: {
+          primary: '#FFFFFF',
+          secondary: '#BDBDBD',
         },
       },
     },
@@ -120,9 +142,38 @@ const demoTheme = createTheme({
       xl: 1536,
     },
   },
+  shape: { borderRadius: 12 },
+  typography: {
+  fontFamily: '"Segoe UI", "Roboto", "Arial", sans-serif',  // ✅ 主字体
+  fontWeightRegular: 400, // ✅ 正文字体粗细
+  fontWeightMedium: 500,
+  fontWeightBold: 700,
+  button: { // ✅ 按钮专属设定
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+},
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,           // 按钮圆角
+          textTransform: 'none',     // 按钮文字不全大写
+          fontWeight: 600,           // 按钮字体加粗
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,          // 卡片圆角
+          boxShadow: '0 4px 24px #0001', // 卡片阴影
+        },
+      },
+    },
+  },
 });
-
-
 
 const AUTHENTICATION: Authentication = {
   signIn: signInWithGoogle,

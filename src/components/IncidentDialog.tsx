@@ -12,7 +12,15 @@ interface Props {
 
 export default function IncidentDialog({ open, state, onCancel, onConfirm, onCloseSuccess, ticketId }: Props) {
   return (
-    <Dialog open={open} onClose={onCancel}>
+    <Dialog
+      open={open}
+      fullWidth
+      maxWidth="sm" // 或 "md"，更宽一点
+      onClose={(e, reason) => {
+        if (state === 'loading' || state === 'success') return;
+        onCancel();
+      }}
+    >
       {state === 'confirm' && (
         <>
           <DialogTitle>Confirm Submit</DialogTitle>

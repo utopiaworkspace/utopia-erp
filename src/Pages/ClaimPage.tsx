@@ -274,10 +274,33 @@ export default function ClaimPage() {
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
           <Typography variant="body1" color="text.secondary">
-          Use this page to submit a reimbursement claim.
+          Submit your reimbursement claim here 🧾
           <br />
-          Click the button below to complete the form and upload any necessary receipts. The form accommodates both <strong>general</strong> and <strong>benefit</strong> claims.
-          </Typography>
+          <br />
+          📌 This is Phase 1 of our internal claim system. 
+          <br />
+          Currently, the system focuses on submission only, history and status tracking will be added soon.
+          <br />
+          <br />
+          1) Snap and upload your receipt here
+          <br />
+          2) Hand in the original receipt to:
+          <br />
+          <span style={{ marginLeft: 24 }}>
+            - HR Department (benefit claim)
+          </span>
+          <br />
+          <span style={{ marginLeft: 24 }}>
+            - Your Manager (general claim)
+          </span>
+          <br />
+          <br />      
+          After submission, a <strong>Claim ID</strong> will be shown
+          <br /> 
+          <strong>📸 Please screenshot and save it</strong>
+          <br />
+          <strong>🚫 No original Receipt = No approval</strong>
+         </Typography>
         </CardContent>
       </Card>
 
