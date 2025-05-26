@@ -23,9 +23,12 @@
   },
   "scripts": {
     "dev": "vite",
-    "start": "vite",
     "build": "vite build",
-    "eject": "echo 'Eject is not supported with Vite!' && exit 1"
+    "preview": "vite preview",
+    "build:staging": "vite build --mode staging",
+    "deploy:staging": "firebase deploy --only hosting:staging",
+    "build:production": "vite build --mode production",
+    "deploy:production": "firebase deploy --only hosting:production"
   },
   "eslintConfig": {
     "extends": [

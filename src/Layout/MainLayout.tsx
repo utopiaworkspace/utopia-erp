@@ -12,7 +12,7 @@ export default function Layout() {
   if (loading) { // If still checking login status
     return (
       <div style={{ width: '100%' }}>
-        <LinearProgress /> // Show a loading bar
+        <LinearProgress /> {/* Show a loading bar */}
       </div>
     );
   }
@@ -25,10 +25,32 @@ export default function Layout() {
   }
 
   return (
-    <DashboardLayout> // Main dashboard layout
-      <PageContainer> // Container for page content
-        <Outlet /> // Show the current page here
-      </PageContainer>
-    </DashboardLayout>
+    <>
+      {/* Show this orange badge only in staging environment */}
+      {import.meta.env.VITE_ENV === 'staging' && (
+        <div
+          style={{
+            position: 'fixed', // Fix the badge position
+            top: 10, // 10px from the top
+            right: 10, // 10px from the right
+            background: 'orange', // Orange background
+            color: 'white', // White text
+            padding: '6px 12px', // Padding inside the badge
+            borderRadius: '6px', // Rounded corners
+            zIndex: 9999, // Show above other elements
+            fontWeight: 'bold', // Bold text
+            boxShadow: '0 2px 8px rgba(0,0,0,0.2)', // Shadow for better look
+          }}
+        >
+          🧪 Staging Environment {/* Text: Staging Environment */}
+        </div>
+      )}
+
+      <DashboardLayout> {/* Main dashboard layout */}
+        <PageContainer> {/* Container for page content */}
+          <Outlet /> {/* Show the current page here */}
+        </PageContainer>
+      </DashboardLayout>
+    </>
   );
 }
