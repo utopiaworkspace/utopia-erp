@@ -1,58 +1,31 @@
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig";
 
+/**
+ * Generate a unique Incident ID for each incident report.
+ *
+ * Format: IR-yymmdd-xxxx
+ * - yymmdd: today's date (year, month, day)
+ * - xxxx: last 4 characters of a random UUID (almost impossible to repeat)
+ *
+ * Example output: IR-240525-a1f3
+ *
+ * This method is simple and reduces the chance of two users getting the same ID at the same time.
+ *
+ * Usage: Call handleIncidentID() whenever you need a new Incident ID.
+ */
 export function handleIncidentID() {
   const today = new Date();
-  const yymmdd = today.toISOString().slice(2, 10).replace(/-/g, ""); // yymmdd format
+  // Get date in yymmdd format, e.g. "240525"
+  const yymmdd = today.toISOString().slice(2, 10).replace(/-/g, "");
 
-  const randomNum = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
+  // Generate a random UUID and take the last 4 characters as a unique suffix
+  const uuid = crypto.randomUUID(); // Example: "b7e5e2e2-8e2a-4e7c-9a1f-4a1fa1f3a1f3"
+  const suffix = uuid.slice(-4); // Example: "a1f3"
 
-  const incidentId = `IR-${yymmdd}-${randomNum}`;
+  // Combine to form the Incident ID (convert to uppercase for better readability)
+  const incidentId = `IR-${yymmdd}-${suffix}`.toUpperCase();
   console.log(`Generated Incident ID: ${incidentId}`);
 
   return incidentId;
 }
-
-
-// export async function handleIncidentID() {
-//   const collectionRef = 'incidents'; // All incident tickets stored under 'incidents' collection
-//   const counterDocRef = doc(db, collectionRef, 'counter');
-
-//   try {
-//     // Get the current document
-//     const counterDocSnapshot = await getDoc(counterDocRef);
-
-//     let incidentId: string;
-
-//     if (counterDocSnapshot.exists()) {
-//       // Document exists, increment the counter
-//       const currentCounter = counterDocSnapshot.data().counter || 0;
-//       const newCounter = currentCounter + 1;
-
-//       // Update counter in Firestore
-//       await updateDoc(counterDocRef, {
-//         counter: newCounter,
-//       });
-
-//       // Format incident ID
-//       incidentId = `IR-1${newCounter.toString().padStart(3, '0')}`;
-
-//       console.log(`Counter incremented to: ${newCounter}`);
-//       console.log(`Generated Incident ID: ${incidentId}`);
-//     } else {
-//       // If counter document doesn't exist, create it
-//       await setDoc(counterDocRef, {
-//         counter: 1,
-//       });
-
-//       incidentId = 'IR-250001';
-//       console.log("Counter initialized to 1");
-//       console.log(`Generated Incident ID: ${incidentId}`);
-//     }
-
-//     return incidentId;
-//   } catch (error) {
-//     console.error("Error updating incident counter:", error);
-//     throw error;
-//   }
-// }

@@ -1,62 +1,63 @@
-import React from 'react';
+import React from 'react'; // Import React library
 import {
   TextField, MenuItem, Button, Box, Typography, Divider
-} from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, {Dayjs} from 'dayjs';
-import { useState, useEffect } from 'react';
+} from '@mui/material'; // Import Material UI components
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'; // Import date picker provider
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'; // Import date picker component
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'; // Import Dayjs adapter for date picker
+import dayjs, {Dayjs} from 'dayjs'; // Import dayjs for date handling
+import { useState, useEffect } from 'react'; // Import React hooks
 
 interface Props {
-  data: any;
-  onChange: (field: string, value: any) => void;
-  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  data: any; // Data object for form values
+  onChange: (field: string, value: any) => void; // Function to handle field changes
+  onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void; // Function to handle file upload
 }
 
 export default function IncidentForm({ data, onChange, onFileChange }: Props) {
-  const [value, setValue] = React.useState<Dayjs | null>(dayjs());
+  const [value, setValue] = React.useState<Dayjs | null>(dayjs()); // State for date picker value
 
   useEffect(() => {
-    if (!data.date) {
-      const todayStr = dayjs().format('DD-MM-YYYY');
-      onChange('date', todayStr); // sets the value into parent/state
-      setValue(dayjs()); // update local state as well
+    if (!data.date) { // If no date is set yet
+      const todayStr = dayjs().format('DD-MM-YYYY'); // Get today's date as string
+      onChange('date', todayStr); // Set date in parent/state
+      setValue(dayjs()); // Set local date picker state
     }
   }, []);
-  
 
-  const [customUnit, setCustomUnit] = useState('');
+  const [customUnit, setCustomUnit] = useState(''); // State for custom business unit
 
   const units = [
     "Encik Beku", "Ibnu Sina", "SMB", "KMB", "RMB", "RMU", "OTHER"
-  ];
-  
+  ]; // List of business units
+
   return (
-    <Box display="flex" flexDirection="column" gap={2} mt={1} padding={2}>
-      <Typography variant="h6">Your Information</Typography>
+    <Box display="flex" flexDirection="column" gap={2} mt={1} padding={2}> // Main form container
+      <Typography variant="h6">Your Information</Typography> // Section title
+
       <TextField
         label="Name"
         fullWidth
-        value={data.userName || ''} // Assuming `data.userName` contains the user's name
+        value={data.userName || ''} // Show user's name (read-only)
         disabled
       />
-      
+
       <TextField
         label="Your Department"
         fullWidth
         select
         value={data.dept}
-        onChange={(e) => onChange('dept', e.target.value)}
+        onChange={(e) => onChange('dept', e.target.value)} // Update department
       >
         {["Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter"].map((dept) => (
-          <MenuItem key={dept} value={dept}>{dept}</MenuItem>
+          <MenuItem key={dept} value={dept}>{dept}</MenuItem> // Department options
         ))}
       </TextField>
 
-      <Divider sx={{ my: 0.5 }} />
+      <Divider sx={{ my: 0.5 }} /> // Section divider
 
-      <Typography variant="h6" mt={2}>Incident Information</Typography>
+      <Typography variant="h6" mt={2}>Incident Information</Typography> // Section title
+
       <TextField
         label="Business Unit"
         select
@@ -64,12 +65,12 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         value={data.responsibleUnit}
         onChange={(e) => {
           const value = e.target.value;
-          onChange('responsibleUnit', value);
+          onChange('responsibleUnit', value); // Update business unit
           if (value !== 'OTHER') {
-            setCustomUnit('');
+            setCustomUnit(''); // Clear custom unit if not "OTHER"
           }
         }}
-        required // 这里设置为必填
+        required
       >
         {units.map((unit) => (
           <MenuItem key={unit} value={unit}>
@@ -80,30 +81,29 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
 
       {data.responsibleUnit === 'OTHER' && (
         <TextField
-          label="Please specify unit"
+          label="Please specify business unit"
           fullWidth
           value={customUnit}
           onChange={(e) => {
-            setCustomUnit(e.target.value); // ✅ only update local state
-            // Don't call onChange here; keep 'responsibleUnit' = 'OTHER'
+            setCustomUnit(e.target.value);
+            onChange('customUnit', e.target.value);
           }}
-          required // 这里设置为必填
+          required
         />
       )}
+
       <TextField
         label="Incident Type"
         select
         fullWidth
         value={data.incidentType}
         onChange={(e) => onChange('incidentType', e.target.value)}
-        required // 这里设置为必填
-        
-        >
+        required
+      >
         <MenuItem value="Internal Staff Issue">Internal Staff Issue</MenuItem>
         <MenuItem value="Customer Complaint">Customer Complaint</MenuItem>
         <MenuItem value="After Sales Service">After Sales Problem</MenuItem>
         <MenuItem value="Other">Other</MenuItem>
-
       </TextField>
 
       <TextField
@@ -112,13 +112,10 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         fullWidth
         value={data.severityLevel}
         onChange={(e) => onChange('severityLevel', e.target.value)}
-        
-
-        >
+      >
         <MenuItem value="Low">Low</MenuItem>
         <MenuItem value="Medium">Medium</MenuItem>
         <MenuItem value="High">High</MenuItem>
-
       </TextField>
 
       <TextField
@@ -126,13 +123,12 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         fullWidth
         value={data.invoiceNum}
         onChange={(e) => onChange('invoiceNum', e.target.value)}
-        
       />
 
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <DatePicker
           sx={{ minWidth: "40%" }}
-          label="Date of Incident"    
+          label="Date of Incident"
           value={value}
           maxDate={dayjs()}
           onChange={(newValue) => onChange('date', newValue ? newValue.format('DD-MM-YYYY') : '')}
@@ -148,7 +144,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         fullWidth
         select
         value={data.responsibleDept}
-        required // 这里设置为必填
+        required
         onChange={(e) => onChange('responsibleDept', e.target.value)}
       >
         {["Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter", "Other"].map((dept) => (
@@ -163,8 +159,6 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         onChange={(e) => onChange('responsibleName', e.target.value)}
         helperText="ℹ️ e.g. Ahmad"
       />
-
-      
 
       <Button variant="outlined" component="label" fullWidth>
         {data.file ? `File: ${data.file.name}` : "Upload Incident Image or PDF"}
@@ -183,7 +177,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         rows={4}
         value={data.description}
         onChange={(e) => onChange('description', e.target.value)}
-        required // 这里设置为必填
+        required
         helperText="ℹ️ e.g. Indoor did not key in data into the prepared sheet"
       />
 

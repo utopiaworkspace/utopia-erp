@@ -2,52 +2,60 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc } from "firebase/firestore
 import { db } from "../firebase/firebaseConfig";
 // Initialize Firestore
 
+/**
+ * Recommended: Generate a unique Claim ID using date and 4-char UUID suffix.
+ * Format: CLG-YYMMDD-XXXX or CLB-YYMMDD-XXXX
+ * - CLG: General Claim
+ * - CLB: Benefit Claim
+ * - YYMMDD: today's date
+ * - XXXX: last 4 chars of a random UUID
+ * Example: CLG-240525-A1F3
+ */
+export function handleClaimID(claimType: string) {
+  const today = new Date();
+  const yymmdd = today.toISOString().slice(2, 10).replace(/-/g, "");
 
-export async function handleClaimID(claimType: string) {
-    const collectionRef = claimType === 'General' ? 'claimsgeneral' : 'claimsbenefit';
-    
-    // Reference to the document in Firebase
-    const counterDocRef = doc(db, collectionRef, 'counter'); // You may have a different logic to identify the document
+  // Generate a random UUID and take the last 4 characters as a unique suffix
+  const uuid = crypto.randomUUID();
+  const suffix = uuid.slice(-4);
 
-    try {
-        // Get the current document
-        const counterDocSnapshot = await getDoc(counterDocRef);
+  // Prefix: CLG for General, CLB for Benefit
+  const prefix = claimType === 'General' ? 'CLG' : 'CLB';
 
-        let claimId: string;
+  // Combine to form the Claim ID (uppercase for readability)
+  const claimId = `${prefix}-${yymmdd}-${suffix}`.toUpperCase();
+  console.log(`Generated Claim ID: ${claimId}`);
 
-        if (counterDocSnapshot.exists()) {
-            // Document exists, increment the counter
-            const currentCounter = counterDocSnapshot.data().counter || 0;
-            const newCounter = currentCounter + 1;
-
-            // Update counter in the database
-            await updateDoc(counterDocRef, {
-                counter: newCounter
-            });
-
-            // Generate claimId based on the type and counter
-            claimId = claimType === 'General' ? `CLG-25${newCounter.toString().padStart(4, '0')}` : `CLB-25${newCounter.toString().padStart(4, '0')}`;
-
-            console.log(`Counter incremented to: ${newCounter}`);
-            console.log(`Generated Claim ID: ${claimId}`);
-        } else {
-            // Document doesn't exist, set counter to 1
-            await setDoc(counterDocRef, {
-                counter: 1
-            });
-
-            // Generate claimId for first entry
-            claimId = claimType === 'General' ? 'CLG-250001' : 'CLB-250001';
-
-            console.log("Counter initialized to 1");
-            console.log(`Generated Claim ID: ${claimId}`);
-        }
-
-        // Return or use the generated claimId
-        return claimId;
-
-    } catch (error) {
-        console.error("Error updating counter:", error);
-        throw error;
-    }
+  return claimId;
 }
+
+/*
+ // (Legacy) Firestore counter version for strictly increasing Claim IDs:
+ // Uncomment this function if you want to use Firestore for sequential IDs.
+ // This method is slower and requires Firestore write/read for every claim.
+
+export async function handleClaimIDFirestore(claimType: string) {
+  const today = new Date();
+  const yymmdd = today.toISOString().slice(2, 10).replace(/-/g, "");
+  const prefix = claimType === 'General' ? 'CLG' : 'CLB';
+
+  const collectionRef = 'claims';
+  const counterDocRef = doc(db, collectionRef, 'counter');
+  let claimId = '';
+
+  const counterDocSnapshot = await getDoc(counterDocRef);
+
+  if (counterDocSnapshot.exists()) {
+    const currentCounter = counterDocSnapshot.data().counter || 0;
+    const newCounter = currentCounter + 1;
+    await updateDoc(counterDocRef, { counter: newCounter });
+    claimId = `${prefix}-${yymmdd}-${String(newCounter).padStart(4, '0')}`.toUpperCase();
+  } else {
+    await setDoc(counterDocRef, { counter: 1 });
+    claimId = `${prefix}-${yymmdd}-0001`.toUpperCase();
+  }
+
+  console.log(`Generated Claim ID (Firestore): ${claimId}`);
+  return claimId;
+}
+*/

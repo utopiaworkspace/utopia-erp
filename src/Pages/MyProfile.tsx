@@ -45,7 +45,16 @@ export default function MyProfile() {
     "MOBILE WHEELER SDN BHD", "OTHER"
   ];
   const depts = [
-    "Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter"
+    "Operation",
+    "Finance & Account",
+    "Indoor Sales",
+    "Outdoor Agent",
+    "Customer Service",
+    "HR Generalist",
+    "HR Recruiter",
+    "Website & Creative",      // Added
+    "Maintenance",             // Added
+    "Top management"           // Added
   ];
 
   if (loading) {

@@ -2,6 +2,17 @@
   "projects": {
     "default": "utopia-webapp"
   },
-  "targets": {},
+  "targets": {
+    "utopia-webapp": {
+      "hosting": {
+        "staging": [
+          "utopia-webapp-staging"
+        ],
+        "production": [
+          "utopia-webapp"
+        ]
+      }
+    }
+  },
   "etags": {}
 }

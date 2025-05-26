@@ -1,16 +1,34 @@
 {
-  "hosting": {
-    "public": "dist",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  }
+  "hosting": [
+    {
+      "target": "staging",              // This is for staging/testing environment
+      "public": "dist",             // Firebase will host files from the "dist" folder (your built project)
+      "ignore": [
+        "firebase.json",            // Do not upload this config file
+        "**/.*",                    // Do not upload hidden files (like .env, .gitignore)
+        "**/node_modules/**"        // Do not upload node_modules folder
+      ],
+      "rewrites": [
+        {
+          "source": "**",           // For any URL
+          "destination": "/index.html" // Always show index.html (for single-page apps like React)
+        }
+      ]
+    },
+    {
+      "target": "production",          // This is for production/live environment
+      "public": "dist",             // Also hosts from the "dist" folder
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
 }
