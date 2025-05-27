@@ -282,19 +282,24 @@ export default function ClaimPage() {
           Currently, the system focuses on submission only, history and status tracking will be added soon.
           <br />
           <br />
-          1) Snap and upload your receipt here
+          Steps:
           <br />
-          2) Hand in the original receipt to:
+          1) Snap and upload your receipts here
           <br />
-          <span style={{ marginLeft: 24 }}>
-            - HR Department (benefit claim)
-          </span>
+          2) Paste the original receipts on an A4 paper.
           <br />
           <span style={{ marginLeft: 24 }}>
-            - Your Manager (general claim)
+            -At the top of the paper, clearly write your:
+            <br /> 1️⃣ Full Name
+            <br /> 2️⃣ Company Name
+            <br /> 3️⃣ Claim ID
           </span>
           <br />
-          <br />      
+          3) Submit the A4 paper with the original receipts to the Finance Department
+          <br /> 
+          (Mailbox at Utopia Main Office).
+          <br />
+          <br />
           After submission, a <strong>Claim ID</strong> will be shown
           <br /> 
           <strong>📸 Please screenshot and save it</strong>

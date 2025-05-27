@@ -6,6 +6,8 @@ import { PageContainer } from '@toolpad/core/PageContainer'; // Import page cont
 import { useSession } from '../SessionContext'; // Import custom hook for user session
 
 export default function Layout() {
+  console.log("当前环境是:", import.meta.env.VITE_ENV);
+
   const { session, loading } = useSession(); // Get user session and loading status
   const location = useLocation(); // Get current page location
 
