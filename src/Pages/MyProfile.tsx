@@ -281,7 +281,7 @@ export default function MyProfile() {
 
         <Typography variant="h6">Bank Information</Typography>
         <TextField
-          label="Bank Holder"
+          label="Bank Account Holder Name"
           name="bankHolder"
           value={bankInfo?.bankHolder || ''}
           onChange={handleBankChange}
@@ -295,7 +295,7 @@ export default function MyProfile() {
           fullWidth
         />
         <TextField
-          label="Bank Number"
+          label="Bank Account Number"
           name="bankNum"
           value={bankInfo?.bankNum || ''}
           onChange={handleBankChange}
