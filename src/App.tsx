@@ -184,6 +184,16 @@ export default function App() {
   const [session, setSession] = React.useState<Session | null>(null);
   const [loading, setLoading] = React.useState(true);
 
+  // ✅ 自动跳转 web.app → app.utopiagroup.com.my（仅 production 环境）
+  React.useEffect(() => { // Run this effect once when the App loads
+    if (
+      import.meta.env.VITE_ENV === 'production' && // Only run in production environment
+      window.location.hostname.includes('web.app') // Only if the domain contains 'web.app'
+    ) {
+      window.location.href = 'https://app.utopiagroup.com.my'; // Redirect to your main domain
+    }
+  }, []); // Empty array means this runs only once when the component mounts
+
   const sessionContextValue = React.useMemo(
     () => ({
       session,

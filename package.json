@@ -25,10 +25,15 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+
     "build:staging": "vite build --mode staging",
     "deploy:staging": "firebase deploy --only hosting:staging",
+    "release:staging": "npm run build:staging && npm run deploy:staging",
+
     "build:production": "vite build --mode production",
-    "deploy:production": "firebase deploy --only hosting:production"
+    "deploy:production": "firebase deploy --only hosting:production",
+    "release:production": "npm run build:production && npm run deploy:production"
+
   },
   "eslintConfig": {
     "extends": [
