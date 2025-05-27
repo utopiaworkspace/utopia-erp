@@ -11,7 +11,8 @@ const AppRoutes = () => {
     <Router>
       <Routes>
         <Route path="/" element={<SignIn />} />
-        
+
+        {/* Protected routes under Layout */}
         <Route path="/home" element={<Layout />} />
       </Routes>
     </Router>

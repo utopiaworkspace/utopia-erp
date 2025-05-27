@@ -34,18 +34,18 @@ const NAVIGATION: Navigation = [
   },
   {
     segment: 'claims',
-    title: 'Claims', // Sidebar title
-    icon: <ReceiptLongIcon/>,
+    title: 'Claims',
+    icon: <ReceiptLongIcon />,
   },
   {
     segment: 'incidents',
     title: 'Incident Report',
-    icon: <ReportIcon/>,
+    icon: <ReportIcon />,
   },
   {
     segment: 'my-profile',
     title: 'My Profile',
-    icon: <AccountCircleIcon/>,
+    icon: <AccountCircleIcon />,
   },
   {
     kind: 'divider',

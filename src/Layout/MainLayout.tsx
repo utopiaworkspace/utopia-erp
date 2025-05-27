@@ -1,6 +1,6 @@
 import * as React from 'react'; // Import React library
 import LinearProgress from '@mui/material/LinearProgress'; // Import loading bar component
-import { Outlet, Navigate, useLocation } from 'react-router'; // Import routing tools
+import { Outlet, Navigate, useLocation } from 'react-router-dom'; // ✅ Correct import from react-router-dom
 import { DashboardLayout } from '@toolpad/core/DashboardLayout'; // Import dashboard layout
 import { PageContainer } from '@toolpad/core/PageContainer'; // Import page container
 import { useSession } from '../SessionContext'; // Import custom hook for user session
