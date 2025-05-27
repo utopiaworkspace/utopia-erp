@@ -3,10 +3,7 @@ import react from '@vitejs/plugin-react';      // Import React plugin for Vite
 import path from 'path';                      // Import Node.js path module
 
 export default defineConfig(({ mode }) => {    // Export Vite config, mode is 'development', 'staging', or 'production'
-  // 👇 加载对应 .env 文件（.env.staging、.env.production）
   const env = loadEnv(mode, process.cwd());   // Load environment variables for the current mode
-
-  console.log('🔍 当前 VITE_ENV:', env.VITE_ENV); // Print current VITE_ENV to console
 
   return {
     plugins: [react()],                       // Use React plugin
@@ -18,6 +15,10 @@ export default defineConfig(({ mode }) => {    // Export Vite config, mode is 'd
       alias: {
         '@': path.resolve(__dirname, './src'), // Use '@' as alias for './src' folder
       },
+    },
+    server: {
+      port: 3000,   // Always use http://localhost:3000
+      open: true,   // Auto open browser when server starts
     },
   };
 });

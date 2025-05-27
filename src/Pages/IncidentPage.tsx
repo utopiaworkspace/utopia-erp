@@ -178,19 +178,20 @@ export default function IncidentPage() {
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
           <Typography variant="body1" color="text.secondary">
-          This page allows you to submit an incident report — like staff issues, customer complaints, or problems after a job is done and etc.
-          <br />
-          <br />
-          📌 This is Phase 1 of our incident reporting system.
-          <br />
-          Currently, the system focuses on submission only, history and status tracking will be added soon.
-          <br />
-          <br />
-          Please choose the correct <strong>incident type & severity level</strong> before you submit.
-          <br />
-          Your report will be sent to the management team to follow up. 
-          <br />
-          This helps us solve problems faster and improve teamwork.
+            This page allows you to submit an incident report, such as:
+            <ul style={{ paddingLeft: 20, marginTop: 8 }}>
+              <li>Staff issues</li>
+              <li>Customer complaints</li>
+              <li>Post-job problems</li>
+            </ul>
+            <br />
+            📌 Phase 1: Submission only. History and tracking will be added soon.
+            <br /><br />
+            <strong>Before submitting:</strong>
+            <ul style={{ paddingLeft: 20, marginTop: 8 }}>
+              <li>Choose the correct <strong>incident type</strong> and <strong>severity level</strong>.</li>
+              <li>Your report will be sent to the management team for follow-up.</li>
+            </ul>
           </Typography>
         </CardContent>
       </Card>

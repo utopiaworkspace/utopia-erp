@@ -273,43 +273,38 @@ export default function ClaimPage() {
       
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
-          <Typography variant="body1" color="text.secondary">
-          Submit your reimbursement claim here 🧾
-          <br />
-          <br />
-          📌 This is Phase 1 of our internal claim system. 
-          <br />
-          Currently, the system focuses on submission only, history and status tracking will be added soon.
-          <br />
-          <br />
-          Steps:
-          <br />
-          1) Snap and upload your receipts here
-          <br />
-          2) Paste the original receipts on an A4 paper.
-          <br />
-          <span style={{ marginLeft: 24 }}>
-            -At the top of the paper, clearly write your:
-            <br /> 1️⃣ Full Name
-            <br /> 2️⃣ Company Name
-            <br /> 3️⃣ Claim ID
-          </span>
-          <br />
-          3) Submit the A4 paper with the original receipts to the Finance Department
-          <br /> 
-          (Mailbox at Utopia Main Office).
-          <br />
-          <br />
-          After submission, a <strong>Claim ID</strong> will be shown
-          <br /> 
-          <strong>📸 Please screenshot and save it</strong>
-          <br />
-          <strong>🚫 No original Receipt = No approval</strong>
-         </Typography>
+          <Typography variant="body1" color="text.secondary" component="div">
+            This page allows you to submit a reimbursement claim, such as:
+            <ul style={{ paddingLeft: 20, marginTop: 8 }}>
+              <li>General Claim: For general expenses.</li>
+              <li>Benefit Claim: For specific benefits provided by the company.</li>
+            </ul>
+            <br />
+            📌 Phase 1: Submission only. History and tracking will be added soon.
+            <br /><br />
+            <strong>Steps:</strong>
+            <ol style={{ paddingLeft: 20, margin: 0 }}>
+              <li>Snap and upload your receipts here.</li>
+              <li>Paste the original receipts on an A4 paper.</li>
+              <li>
+                At the top of the paper, clearly write:
+                <ul style={{ paddingLeft: 20, marginTop: 4 }}>
+                  <li>Full Name</li>
+                  <li>Company Name</li>
+                  <li>Claim ID</li>
+                </ul>
+              </li>
+              <li>Submit the A4 paper with the original receipts to the Finance Department.</li>
+            </ol>
+            <br />
+            After submission, a <strong>Claim ID</strong> will be shown.
+            <br />
+            <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it.</span>
+            <br />
+            <span style={{ color: '#d32f2f', fontWeight: 600 }}>🚫 No original receipt = No approval.</span>
+          </Typography>
         </CardContent>
       </Card>
-
-      
       <Button variant="contained" onClick={handleOpen}>
         Submit Claim
       </Button>

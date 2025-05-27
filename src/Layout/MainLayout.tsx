@@ -6,8 +6,6 @@ import { PageContainer } from '@toolpad/core/PageContainer'; // Import page cont
 import { useSession } from '../SessionContext'; // Import custom hook for user session
 
 export default function Layout() {
-  console.log("当前环境是:", import.meta.env.VITE_ENV);
-
   const { session, loading } = useSession(); // Get user session and loading status
   const location = useLocation(); // Get current page location
 
@@ -33,8 +31,8 @@ export default function Layout() {
         <div
           style={{
             position: 'fixed', // Fix the badge position
-            top: 10, // 10px from the top
-            right: 10, // 10px from the right
+            top: 70, // 70px from the top
+            right: 16, // 16px from the right
             background: 'orange', // Orange background
             color: 'white', // White text
             padding: '6px 12px', // Padding inside the badge
