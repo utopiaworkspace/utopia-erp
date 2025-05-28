@@ -84,14 +84,26 @@ export default function ClaimForm({
         required
       >
         {[
-          "UTOPIA HOLIDAY SDN BHD", "SCAFFOLDING MALAYSIA SDN BHD", "IBNU SINA CARE SDN BHD",
-          "REV MOVE SDN BHD", "REV MOVE UTARA SDN BHD", "KAK KENDURI SDN BHD",
-          "ENCIK BEKU AIRCOND SDN BHD", "BUTIK GLAM & LUX SDN BHD", "PULSE PIALTES SDN BHD",
-          "ANJAKAN STRATEGIK SDN BHD", "MIMPIAN ASTAKA SDN BHD", "MEKAR BUDI SDN BHD",
-          "MUTIARA EMBUN SDN BHD", "MERRY ELDERLY CARE SDN BHD", "COLD TRUCK MALAYSIA SDN BHD",
+          "UTOPIA HOLIDAY SDN BHD",
+          "SCAFFOLDING MALAYSIA SDN BHD",
+          "IBNU SINA CARE SDN BHD",
+          "REV MOVE SDN BHD",
+          "REV MOVE UTARA SDN BHD",
+          "KAK KENDURI SDN BHD",
+          "ENCIK BEKU AIRCOND SDN BHD",
+          "BUTIK GLAM & LUX SDN BHD",
+          "PULSE PILATES SDN BHD",
+          "ANJAKAN STRATEGIK SDN BHD",
+          "MIMPIAN ASTAKA SDN BHD",
+          "MEKAR BUDI SDN BHD",
+          "MUTIARA EMBUN SDN BHD",
+          "MERRY ELDERLY CARE SDN BHD",
+          "COLD TRUCK MALAYSIA SDN BHD",
           "MOBILE WHEELER SDN BHD"
         ].map((unit) => (
-          <MenuItem key={unit} value={unit}>{unit}</MenuItem>
+          <MenuItem key={unit} value={unit}>
+            {unit}
+          </MenuItem>
         ))}
       </TextField>
 
