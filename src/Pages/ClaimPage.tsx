@@ -294,14 +294,14 @@ export default function ClaimPage() {
                   <li>Claim ID</li>
                 </ul>
               </li>
-              <li>Submit the A4 paper with the original receipts to the Finance Department.</li>
+              <li>Submit the A4 paper with the original receipts to the Finance Department (Mailbox at Utopia Main Office).</li>
             </ol>
             <br />
             After submission, a <strong>Claim ID</strong> will be shown.
             <br />
             <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it.</span>
             <br />
-            <span style={{ color: '#d32f2f', fontWeight: 600 }}>🚫 No original receipt = No process.</span>
+            <span style={{ color: '#d32f2f', fontWeight: 600 }}>🚫 No original receipt = No process</span>
           </Typography>
         </CardContent>
       </Card>

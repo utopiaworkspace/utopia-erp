@@ -57,24 +57,27 @@ export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseS
               ✅ Claim Submitted Successfully!
               <br />
               <br />
-              Your Claim ID is <strong>{claimId}.</strong>
+              Your Claim ID: <strong>{claimId}</strong>
+              <br />
+              <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it.</span>
               <br />
               <br />
-              <strong>📸 Please screenshot this page and keep a copy.</strong>
+              📌 What to do next:
+              <ol style={{ paddingLeft: 20, margin: 0 }}>
+                <li>Paste your original receipt on A4 paper.</li>
+                <li>Write at the top:
+                  <ul style={{ paddingLeft: 20, marginTop: 4 }}>
+                    <li>Your Full Name</li>
+                    <li>Company Name</li>
+                    <li>Claim ID</li>
+                  </ul>
+                </li>
+                <li>Submit the A4 paper to the Finance Department 
+                  <br />
+                  (Mailbox at Utopia Main Office).</li>
+              </ol>
               <br />
-              <br />
-              📌 Reminder:
-              <br />
-              Write your <strong>name</strong> and <strong>Claim ID</strong> on the original receipt.  
-              <br />
-              Submit the original receipt for processing.
-              <br />
-              - HR Department (benefit claim)
-              <br />
-              - Your Manager (general claim)
-              <br />
-              <br />
-              Claims without original receipts will not be approved.
+              <span style={{ color: '#d32f2f', fontWeight: 600 }}>❗ No original receipt = No process</span>
             </Typography>
           </DialogContent>
           <DialogActions>
