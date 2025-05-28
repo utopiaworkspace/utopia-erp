@@ -39,7 +39,7 @@ export default function MyProfile() {
   const units = [
     "UTOPIA HOLIDAY SDN BHD", "SCAFFOLDING MALAYSIA SDN BHD (SMB)", "IBNU SINA CARE SDN BHD",
     "REV MOVE SDN BHD (RMB)", "REV MOVE UTARA SDN BHD (RMU)", "KAK KENDURI SDN BHD (KMB)",
-    "ENCIK BEKU AIRCOND SDN BHD", "BUTIK GLAM & LUX SDN BHD", "PULSE PIALTES SDN BHD",
+    "ENCIK BEKU AIRCOND SDN BHD", "BUTIK GLAM & LUX SDN BHD", "PULSE PILATES SDN BHD",
     "ANJAKAN STRATEGIK SDN BHD", "MIMPIAN ASTAKA SDN BHD", "MEKAR BUDI SDN BHD",
     "MUTIARA EMBUN SDN BHD", "MERRY ELDERLY CARE SDN BHD", "COLD TRUCK MALAYSIA SDN BHD",
     "MOBILE WHEELER SDN BHD", "OTHER"
@@ -54,7 +54,7 @@ export default function MyProfile() {
     "HR Recruiter",
     "Website & Creative",      // Added
     "Maintenance",             // Added
-    "Top management"           // Added
+    "Top Management"           // Added
   ];
 
   if (loading) {
