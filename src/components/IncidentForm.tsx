@@ -179,9 +179,9 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
       />
 
       <Button variant="outlined" component="label" fullWidth>
-        {data.file ? `File: ${data.file.name}` : "Upload Incident Image or PDF"}
+        {data.file ? `File: ${data.file.name}` : "Upload Incident Image"}
         <input
-          accept="image/*,application/pdf"
+          accept="image/*"
           type="file"
           hidden
           onChange={onFileChange}

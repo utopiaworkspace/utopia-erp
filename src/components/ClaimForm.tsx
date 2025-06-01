@@ -190,9 +190,9 @@ export default function ClaimForm({
             component="label"
             fullWidth
           >
-            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF)"}
+            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image only)"}
             <input
-              accept="image/*,application/pdf"
+              accept="image/*"
               type="file"
               hidden
               onChange={(e) => onFileChange(index, e.target.files?.[0] || null)}
@@ -234,7 +234,7 @@ export default function ClaimForm({
         }}
         variant="outlined"
       >
-        Add Another Receipt
+        Add More Receipt
       </Button>
 
       <Typography align="right" fontWeight="bold" mt={2}>
