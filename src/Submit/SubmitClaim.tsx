@@ -10,17 +10,26 @@ export async function submitClaim(claimData: any) {
     const claimId = await handleClaimID(claimData.claimType);
     claimData.claimId = claimId;
    
-
+    // 1️⃣ Set receipt prefix based on claim type
+    // If it's General claim → use 'RCG', if Benefit claim → use 'RCB'
     const receiptPrefix = claimData.claimType === 'General' ? 'RCG' : 'RCB';
 
-    // Convert each receipt file to base64 and add receipt ID
+    // 2️⃣ Process all uploaded receipts
     const receiptsWithBase64 = await Promise.all(
       claimData.receipts.map(async (receipt: any, index: number) => {
+        // Convert the file to base64 format (for upload)
         const base64 = await convertFileToBase64(receipt.file);
-        const receiptNumber = (index + 1).toString().padStart(2, '0'); // 01, 02, 03, etc.
+        
+         // Make 2-digit receipt number: 1 → 01, 2 → 02
+        const receiptNumber = (index + 1).toString().padStart(2, '0');
+
+         // Remove 'CLG-' or 'CLB-' from claim ID → leave only date + code
+        const cleanClaimId = claimId.replace(/^CL[GB]-/, '');
 
         return {
-          receiptId: `${receiptPrefix}-${claimId.slice(-6)}-${receiptNumber}`, // e.g., RCG-250001-001
+          // Example: RCG-250531-8F4A-01
+          receiptId: `${receiptPrefix}-${cleanClaimId}-${receiptNumber}`,
+
           receiptDate: receipt.date,
           description: receipt.description,
           amount: receipt.amount,
@@ -32,6 +41,7 @@ export async function submitClaim(claimData: any) {
         };
       })
     );
+
 
     claimData.receipts = receiptsWithBase64;
 

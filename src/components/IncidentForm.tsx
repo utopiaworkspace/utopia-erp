@@ -28,12 +28,12 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
   const [customUnit, setCustomUnit] = useState(''); // State for custom business unit
 
   const units = [
-    "Encik Beku", "Ibnu Sina", "SMB", "KMB", "RMB", "RMU", "OTHER"
+    "Encik Beku", "Ibnu Sina", "SMB", "KMB", "RMB", "RMU", "Other"
   ]; // List of business units
 
   return (
-    <Box display="flex" flexDirection="column" gap={2} mt={1} padding={2}> // Main form container
-      <Typography variant="h6">Your Information</Typography> // Section title
+    <Box display="flex" flexDirection="column" gap={2} mt={1} padding={2}>
+      <Typography variant="h6">Your Information</Typography>
 
       <TextField
         label="Name"
@@ -48,15 +48,18 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         select
         value={data.dept}
         onChange={(e) => onChange('dept', e.target.value)} // Update department
+        sx={{ mb: 0.5 }}
       >
-        {["Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter"].map((dept) => (
-          <MenuItem key={dept} value={dept}>{dept}</MenuItem> // Department options
+        {["Operation", "Finance & Account", "Indoor Sales", "Outdoor Agent", "Customer Service", "HR Generalist", "HR Recruiter", "Website & Creative", "Maintenance", "Other"].map((dept) => (
+          <MenuItem key={dept} value={dept}>
+            {dept}
+          </MenuItem>
         ))}
       </TextField>
 
-      <Divider sx={{ my: 0.5 }} /> // Section divider
+      <Divider sx={{ my: 0.2 }} /> {/* Divider for visual separation */}
 
-      <Typography variant="h6" mt={2}>Incident Information</Typography> // Section title
+      <Typography variant="h6" mt={2}>Incident Information</Typography> 
 
       <TextField
         label="Business Unit"
@@ -66,8 +69,8 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         onChange={(e) => {
           const value = e.target.value;
           onChange('responsibleUnit', value); // Update business unit
-          if (value !== 'OTHER') {
-            setCustomUnit(''); // Clear custom unit if not "OTHER"
+          if (value !== 'Other') {
+            setCustomUnit(''); // Clear custom unit if not "Other"
           }
         }}
         required
@@ -79,19 +82,21 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         ))}
       </TextField>
 
-      {data.responsibleUnit === 'OTHER' && (
-        <TextField
-          label="Please specify business unit"
-          fullWidth
-          value={customUnit}
-          onChange={(e) => {
-            setCustomUnit(e.target.value);
-            onChange('customUnit', e.target.value);
-          }}
-          required
-        />
-      )}
-
+    
+            
+        {false && data.responsibleUnit === "Other" && (
+          <TextField
+            label="Please specify business unit"
+            fullWidth
+            value={customUnit}
+            onChange={(e) => {
+              setCustomUnit(e.target.value);
+              onChange('customUnit', e.target.value);
+            }}
+            required
+          />
+        )}
+        
       <TextField
         label="Incident Type"
         select
@@ -147,8 +152,21 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         required
         onChange={(e) => onChange('responsibleDept', e.target.value)}
       >
-        {["Operation", "Finance & Account", "Sales - Indoor", "Sales - Outdoor", "Customer Service", "HR - Generalist", "HR - Recruiter", "Other"].map((dept) => (
-          <MenuItem key={dept} value={dept}>{dept}</MenuItem>
+        {[
+          "Operation",
+          "Finance & Account",
+          "Indoor Sales",
+          "Outdoor Agent",
+          "Customer Service",
+          "HR Generalist",
+          "HR Recruiter",
+          "Website & Creative",
+          "Maintenance",
+          "Other", // Updated options
+        ].map((dept) => (
+          <MenuItem key={dept} value={dept}>
+            {dept}
+          </MenuItem>
         ))}
       </TextField>
 

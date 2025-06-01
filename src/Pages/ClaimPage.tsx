@@ -135,6 +135,10 @@ export default function ClaimPage() {
   };
   
   const addReceipt = () => {
+    if (claimData.receipts.length >= 50) {
+      alert('You can only add up to 50 receipts.');
+      return;
+    }
     const newReceipts = [...claimData.receipts, { date: '', description: '', amount: '', file: null }];
   
     const total = newReceipts.reduce((sum, receipt) => {

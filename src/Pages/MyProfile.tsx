@@ -52,9 +52,9 @@ export default function MyProfile() {
     "Customer Service",
     "HR Generalist",
     "HR Recruiter",
-    "Website & Creative",      // Added
-    "Maintenance",             // Added
-    "Top Management"           // Added
+    "Website & Creative", 
+    "Maintenance",
+    "Top Management"
   ];
 
   if (loading) {
@@ -205,7 +205,7 @@ export default function MyProfile() {
           fullWidth
           disabled
         />
-                <TextField
+          <TextField
           label="IC No. / Passport No."
           name="icNum"
           value={userData?.icNum || ''}
@@ -220,9 +220,11 @@ export default function MyProfile() {
           value={userData?.phoneNum || ''}
           onChange={handleUserChange}
           fullWidth
-          slotProps={{
-            input: { inputMode: 'numeric', pattern: '6[0-9]*' }
-        }}
+          inputProps={{
+            inputMode: 'numeric',
+            maxLength: 11, // 限制最大长度为11
+            pattern: '^6[0-9]{8,10}$', // 必须以6开头，后面是8到10位数字
+          }}
           helperText="ℹ️ Must start with 6, numbers only, no '-' symbol or spaces. e.g. 60123456789"
         />
       
