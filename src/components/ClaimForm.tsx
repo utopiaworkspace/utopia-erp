@@ -190,9 +190,9 @@ export default function ClaimForm({
             component="label"
             fullWidth
           >
-            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image only)"}
+            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF)"}
             <input
-              accept="image/*"
+              accept="image/*,application/pdf"
               type="file"
               hidden
               onChange={(e) => onFileChange(index, e.target.files?.[0] || null)}
