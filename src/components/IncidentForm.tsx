@@ -50,7 +50,7 @@ export default function IncidentForm({ data, onChange, onFileChange }: Props) {
         onChange={(e) => onChange('dept', e.target.value)} // Update department
         sx={{ mb: 0.5 }}
       >
-        {["Operation", "Finance & Account", "Indoor Sales", "Outdoor Agent", "Customer Service", "HR Generalist", "HR Recruiter", "Website & Creative", "Maintenance", "Other"].map((dept) => (
+        {["Operation", "Finance & Account", "Indoor Sales", "Outdoor Agent", "Customer Service", "HR Generalist", "HR Recruiter", "Website & Creative", "Sales & Marketing", "Maintenance", "Other"].map((dept) => (
           <MenuItem key={dept} value={dept}>
             {dept}
           </MenuItem>

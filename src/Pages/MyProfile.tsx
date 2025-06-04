@@ -61,7 +61,8 @@ export default function MyProfile() {
     "Customer Service",
     "HR Generalist",
     "HR Recruiter",
-    "Website & Creative", 
+    "Website & Creative",
+    "Sales & Marketing", 
     "Maintenance",
     "Top Management"
   ];
