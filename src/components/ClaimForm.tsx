@@ -48,8 +48,10 @@ export default function ClaimForm({
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      event.returnValue = "Are you sure you want to leave? Unsaved changes will be lost.";
+      if (isDirty) {
+        event.preventDefault();
+        event.returnValue = "Are you sure you want to leave? Unsaved changes will be lost.";
+      }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -57,7 +59,7 @@ export default function ClaimForm({
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
-  }, []);
+  }, [isDirty]);
 
   const handleNavigation = (path: string) => {
     if (isDirty) {
@@ -69,9 +71,6 @@ export default function ClaimForm({
 
   return (
     <Box display="flex" flexDirection="column" gap={2} mt={2} padding={2}>
-      {/* Example navigation button */}
-      <Button onClick={() => handleNavigation("/home")}>Go to Home</Button>
-
       <TextField
         label="Claim Type"
         select
