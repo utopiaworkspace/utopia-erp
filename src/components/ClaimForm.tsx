@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   TextField, MenuItem, Button, Box, Typography, Divider, IconButton
 } from '@mui/material';
@@ -7,6 +7,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
 
 interface Receipt {
@@ -42,8 +43,35 @@ export default function ClaimForm({
   addReceipt,
   removeReceipt
 }: Props) {
+  const navigate = useNavigate();
+  const [isDirty, setIsDirty] = React.useState(false);
+
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "Are you sure you want to leave? Unsaved changes will be lost.";
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, []);
+
+  const handleNavigation = (path: string) => {
+    if (isDirty) {
+      const confirmLeave = window.confirm("Are you sure you want to leave? Unsaved changes will be lost.");
+      if (!confirmLeave) return;
+    }
+    navigate(path);
+  };
+
   return (
     <Box display="flex" flexDirection="column" gap={2} mt={2} padding={2}>
+      {/* Example navigation button */}
+      <Button onClick={() => handleNavigation("/home")}>Go to Home</Button>
+
       <TextField
         label="Claim Type"
         select
@@ -190,13 +218,13 @@ export default function ClaimForm({
             component="label"
             fullWidth
           >
-            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image only)"}
+            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF)"}
             <input
-              accept="image/*"
+              accept="image/*,application/pdf" // 支持图片和 PDF 文件
+              capture="environment" // 启用手机摄像头或文件选择器
               type="file"
               hidden
               onChange={(e) => onFileChange(index, e.target.files?.[0] || null)}
-              
             />
           </Button>
 
