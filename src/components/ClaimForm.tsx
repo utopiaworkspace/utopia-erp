@@ -203,7 +203,7 @@ export default function ClaimForm({
               capture="environment"
               type="file"
               hidden
-              onChange={(e) => onFileChange(index, e.target.files?.[0] || null)}
+              onChange={e => onFileChange(index, e.target.files?.[0] || null)}
             />
           </Button>
           {/* Description for receipt */}
