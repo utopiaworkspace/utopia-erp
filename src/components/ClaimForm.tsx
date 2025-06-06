@@ -65,7 +65,7 @@ export default function ClaimForm({
         select
         fullWidth
         value={data.claimType}
-        onChange={(e) => onChange('claimType', e.target.value)}
+        onChange={e => onChange('claimType', e.target.value)}
         required
       >
         <MenuItem value="General">General</MenuItem>
@@ -79,7 +79,7 @@ export default function ClaimForm({
           select
           fullWidth
           value={data.benefitType}
-          onChange={(e) => onChange('benefitType', e.target.value)}
+          onChange={e => onChange('benefitType', e.target.value)}
           required
         >
           <MenuItem value="OUT-PATIENT (SELF)">OUT-PATIENT (SELF)</MenuItem>
@@ -98,7 +98,7 @@ export default function ClaimForm({
         select
         fullWidth
         value={data.unit}
-        onChange={(e) => onChange('unit', e.target.value)}
+        onChange={e => onChange('unit', e.target.value)}
         required
       >
         {/* Company options */}
@@ -132,7 +132,10 @@ export default function ClaimForm({
         label="Full Name"
         fullWidth
         value={data.fullName}
-        onChange={(e) => onChange('fullName', e.target.value)}
+        onChange={(e) => {
+          onChange('fullName', e.target.value);
+          setIsDirty(true);
+        }}
         required
         helperText="ℹ️ e.g. MUHAMMAD AHMAD BIN ABU BAKAR"
       />
@@ -140,7 +143,10 @@ export default function ClaimForm({
         label="Phone Number"
         fullWidth
         value={data.phoneNumber}
-        onChange={(e) => onChange('phoneNumber', e.target.value)}
+        onChange={(e) => {
+          onChange('phoneNumber', e.target.value);
+          setIsDirty(true);
+        }}
         required
         helperText="ℹ️ Must start with 6, numbers only, no '-' symbol or spaces. e.g. 60123456789"
       />
@@ -148,7 +154,10 @@ export default function ClaimForm({
         label="IC Number/Passport Number"
         fullWidth
         value={data.icNum}
-        onChange={(e) => onChange('icNum', e.target.value)}
+        onChange={(e) => {
+          onChange('icNum', e.target.value);
+          setIsDirty(true);
+        }}
         required
         helperText="ℹ️ Numbers only, no '-' symbol or spaces. e.g. 021012145041 or A12345678"
       />
@@ -163,10 +172,10 @@ export default function ClaimForm({
               <DatePicker
                 label="Receipt Date"
                 value={receipt.date ? dayjs(receipt.date, 'DD-MM-YYYY') : null}
-                onChange={(date) =>
+                onChange={date =>
                   onReceiptChange(index, 'date', date ? date.format('DD-MM-YYYY') : '')
                 }
-                format='DD-MM-YYYY'
+                format="DD-MM-YYYY"
                 maxDate={dayjs()}
                 slotProps={{ textField: { required: true } }}
               />
@@ -176,16 +185,23 @@ export default function ClaimForm({
               label="Amount (RM)"
               type="number"
               value={receipt.amount}
-              onChange={(e) => onReceiptChange(index, 'amount', e.target.value)}
-              onBlur={(e) =>
-                onReceiptChange(index, 'amount', onBlurFormatAmount(e.target.value))
-              }
+              onChange={(e) => {
+                onReceiptChange(index, 'amount', e.target.value);
+                setIsDirty(true);
+              }}
+              onBlur={(e) => {
+                onReceiptChange(index, 'amount', onBlurFormatAmount(e.target.value));
+                setIsDirty(true);
+              }}
               required
               inputProps={{ min: 1, step: "0.01" }}
             />
             {/* Remove receipt button */}
             <IconButton
-              onClick={() => removeReceipt(index)}
+              onClick={() => {
+                removeReceipt(index);
+                setIsDirty(true);
+              }}
               disabled={data.receipts.length === 1}
             >
               <RemoveCircleOutline />
@@ -203,7 +219,10 @@ export default function ClaimForm({
               capture="environment"
               type="file"
               hidden
-              onChange={e => onFileChange(index, e.target.files?.[0] || null)}
+              onChange={(e) => {
+                onFileChange(index, e.target.files?.[0] || null);
+                setIsDirty(true);
+              }}
             />
           </Button>
           {/* Description for receipt */}
@@ -213,7 +232,10 @@ export default function ClaimForm({
             multiline
             rows={2}
             value={receipt.description}
-            onChange={(e) => onReceiptChange(index, 'description', e.target.value)}
+            onChange={(e) => {
+              onReceiptChange(index, 'description', e.target.value);
+              setIsDirty(true);
+            }}
             required
             helperText="ℹ️ e.g. Grab - Meeting at Ibnu Sina Warehouse on xx/xx/xxxx"
           />
@@ -223,7 +245,10 @@ export default function ClaimForm({
       {/* Add more receipts button */}
       <Button
         startIcon={<AddCircleOutline />}
-        onClick={addReceipt}
+        onClick={() => {
+          addReceipt();
+          setIsDirty(true);
+        }}
         sx={{
           mt: 1,
           py: 1.2,

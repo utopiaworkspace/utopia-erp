@@ -5,9 +5,12 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^7.0.2",
-    "@mui/lab": "^7.0.0-beta.11",
-    "@mui/material": "^7.0.2",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/lab": "^7.0.0-beta.13",
+    "@mui/material": "^7.1.1",
+    "@mui/styles": "^6.4.8",
+    "@mui/system": "^7.1.1",
+    "@mui/x-date-pickers": "^8.5.1",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -25,15 +28,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-
     "build:staging": "vite build --mode staging",
     "deploy:staging": "firebase deploy --only hosting:staging",
     "release:staging": "npm run build:staging && npm run deploy:staging",
-
     "build:production": "vite build --mode production",
     "deploy:production": "firebase deploy --only hosting:production",
     "release:production": "npm run build:production && npm run deploy:production"
-
   },
   "eslintConfig": {
     "extends": [

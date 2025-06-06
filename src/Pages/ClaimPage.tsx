@@ -57,9 +57,10 @@ export default function ClaimPage() {
     receipts: [{ date: '', description: '', amount: '', file: null }]
   });
   const [submitTimestamp, setSubmitTimestamp] = useState<string>("");
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
   useEffect(() => {
     const fetchInfo = async () => {
@@ -105,8 +106,12 @@ export default function ClaimPage() {
     setOpen(true);
   };
 
-  const handleDialogClose = () => {
-    resetDialog();
+  const handleDialogClose = (event, reason) => {
+    if (isDirty) {
+      setShowLeaveDialog(true); // 弹出确认提示
+    } else {
+      setOpenDialog(false); // 直接关闭
+    }
   };
 
   const handleChange = (field: string, value: any) => {
@@ -115,6 +120,7 @@ export default function ClaimPage() {
       [field]: value,
       ...(field === 'claimType' && value === 'General' ? { benefitType: '' } : {}), // Clear benefitType if claimType is empty
     }));
+    setIsDirty(true);
   };
 
   const handleReceiptChange = (index: number, field: string, value: any) => {
@@ -132,6 +138,7 @@ export default function ClaimPage() {
       receiptCount: updatedReceipts.length,
       totalAmount: total, // <-- set total together
     }));
+    setIsDirty(true);
   };
  
   const addReceipt = () => {
@@ -152,6 +159,7 @@ export default function ClaimPage() {
       receiptCount: newReceipts.length,
       totalAmount: total,
     }));
+    setIsDirty(true);
   };
  
   const removeReceipt = (index: number) => {
@@ -168,6 +176,7 @@ export default function ClaimPage() {
       receiptCount: newReceipts.length,
       totalAmount: total,
     }));
+    setIsDirty(true);
   };
 
   const handleConfirmSubmit = async () => {
@@ -236,6 +245,7 @@ export default function ClaimPage() {
       receiptCount: 0,
       receipts: [{ date: '', description: '', amount: '', file: null }]
     });
+    setIsDirty(false);
   };
  
   const validateForm = () => {
@@ -275,6 +285,7 @@ export default function ClaimPage() {
       ...prev,
       receipts: updatedReceipts,
     }));
+    setIsDirty(true);
   };
 
   const handleSnackbarClose = () => {
@@ -284,6 +295,17 @@ export default function ClaimPage() {
   const handleOpenDialog = () => {
     setDialogState('confirm');
     setOpenDialog(true);
+  };
+
+  const handleLeaveConfirm = () => {
+    setOpenDialog(false);
+    setShowLeaveDialog(false);
+    setIsDirty(false);
+    resetDialog();
+  };
+
+  const handleLeaveCancel = () => {
+    setShowLeaveDialog(false);
   };
 
   return (
@@ -326,7 +348,7 @@ export default function ClaimPage() {
         Submit Claim
       </Button>
      
-      <Dialog component="form" open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
+      <Dialog component="form" open={open} onClose={handleDialogClose} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
         <DialogTitle>Submit a New Claim</DialogTitle>
         <ClaimForm
           data={claimData}
@@ -335,7 +357,7 @@ export default function ClaimPage() {
           onFileChange={handleFileChange}
           addReceipt={addReceipt}
           removeReceipt={removeReceipt}
-          dialogOpen={dialogOpen}
+          dialogOpen={openDialog}
           onDialogClose={handleDialogClose}
           snackbarOpen={snackbarOpen}
           onSnackbarClose={handleSnackbarClose}
@@ -368,6 +390,19 @@ export default function ClaimPage() {
           Are you sure you want to close the form? Unsaved changes will be lost.
         </Alert>
       </Snackbar>
+      <Dialog
+        open={showLeaveDialog}
+        onClose={handleLeaveCancel}
+      >
+        <DialogTitle>Confirm Leave</DialogTitle>
+        <DialogContent>
+          <Typography>Are you sure you want to close? Your data will be lost.</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleLeaveCancel}>Cancel</Button>
+          <Button onClick={handleLeaveConfirm} color="error">Leave</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
