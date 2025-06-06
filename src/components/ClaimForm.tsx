@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  TextField, MenuItem, Button, Box, Typography, Divider, IconButton
+  TextField, MenuItem, Button, Box, Typography, Divider, IconButton, Dialog, DialogContent, DialogTitle, Snackbar, Alert
 } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -45,6 +45,8 @@ export default function ClaimForm({
 }: Props) {
   const navigate = useNavigate();
   const [isDirty, setIsDirty] = React.useState(false);
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
 
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -69,6 +71,27 @@ export default function ClaimForm({
     navigate(path);
   };
 
+  const handleCloseForm = () => {
+    if (isDirty) {
+      const confirmLeave = window.confirm("Are you sure you want to close the form? Unsaved changes will be lost.");
+      if (!confirmLeave) return;
+    }
+    // Logic to close the form
+  };
+
+  const handleDialogClose = () => {
+    if (isDirty) {
+      setSnackbarOpen(true); // 显示提示
+      return;
+    }
+    setDialogOpen(false);
+  };
+
+  const handleConfirmClose = () => {
+    setDialogOpen(false); // 确定关闭
+    setSnackbarOpen(false); // 关闭提示
+  };
+
   return (
     <Box display="flex" flexDirection="column" gap={2} mt={2} padding={2}>
       <TextField
@@ -76,7 +99,10 @@ export default function ClaimForm({
         select
         fullWidth
         value={data.claimType}
-        onChange={(e) => onChange('claimType', e.target.value)}
+        onChange={(e) => {
+          setIsDirty(true); // 标记表单已修改
+          onChange('claimType', e.target.value);
+        }}
         required
       >
         <MenuItem value="General">General</MenuItem>
@@ -138,7 +164,10 @@ export default function ClaimForm({
         label="Full Name"
         fullWidth
         value={data.fullName}
-        onChange={(e) => onChange('fullName', e.target.value)}
+        onChange={(e) => {
+          setIsDirty(true); // 标记表单已修改
+          onChange('fullName', e.target.value);
+        }}
         required
         helperText="ℹ️ e.g. MUHAMMAD AHMAD BIN ABU BAKAR"
       />
@@ -267,6 +296,44 @@ export default function ClaimForm({
       <Typography align="right" fontWeight="bold" mt={2}>
         Total Amount: RM {data.totalAmount.toFixed(2)}
       </Typography>
+
+      {/* Dialog */}
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        fullWidth
+        maxWidth="md"
+      >
+        <DialogTitle>Submit a New Claim</DialogTitle>
+        <DialogContent>
+          <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant="h6">Receipts</Typography>
+            {data.receipts.map((receipt, index) => (
+              <Box key={index} display="flex" flexDirection="column" gap={1}>
+                {/* Receipt fields */}
+              </Box>
+            ))}
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert
+          severity="warning"
+          action={
+            <Button color="inherit" size="small" onClick={handleConfirmClose}>
+              Confirm
+            </Button>
+          }
+        >
+          Are you sure you want to close the form? Unsaved changes will be lost.
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
