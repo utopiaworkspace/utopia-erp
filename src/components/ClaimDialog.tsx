@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, CircularProgress } from '@mui/material';
+import dayjs from 'dayjs';
 
 interface Props {
   open: boolean;
@@ -10,9 +11,10 @@ interface Props {
   claimId: string;
   totalAmount: number;
   receiptCount: number;
+  submitTimestamp?: string;
 }
 
-export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseSuccess, claimId, totalAmount, receiptCount }: Props) {
+export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseSuccess, claimId, totalAmount, receiptCount, submitTimestamp }: Props) {
   return (
     <Dialog
       open={open}
@@ -28,11 +30,11 @@ export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseS
           <DialogTitle>Confirm Submit</DialogTitle>
           <DialogContent>
             <Typography>
-            Are you sure you want to submit the claim? 
-            <br />
-            Total Amount: RM {totalAmount.toFixed(2)}
-            <br />
-            Number of Receipts: {receiptCount}
+              Are you sure you want to submit the claim?
+              <br />
+              Total Amount: RM {Number(totalAmount).toFixed(2)}
+              <br />
+              Number of Receipts: {receiptCount}
             </Typography>
           </DialogContent>
           <DialogActions>
@@ -59,7 +61,14 @@ export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseS
               <br />
               Your Claim ID: <strong>{claimId}</strong>
               <br />
+              Submitted At: {submitTimestamp ? submitTimestamp : <span style={{color: '#d32f2f'}}>No timestamp</span>}
+              <br />
               <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it.</span>
+              <br />
+              <br />
+              Total Amount: RM {Number(totalAmount).toFixed(2)}
+              <br />
+              Number of Receipts: {receiptCount}
               <br />
               <br />
               📌 What to do next:

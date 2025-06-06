@@ -1,7 +1,7 @@
 import React, { useState, useEffect, use } from 'react';
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
-  DialogActions, TextField, MenuItem, Grid, IconButton, Card, CardContent
+  DialogActions, TextField, MenuItem, Grid, IconButton, Card, CardContent, Snackbar, Alert
 } from '@mui/material';
 import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import Box from '@mui/material/Box';
@@ -20,13 +20,12 @@ import { doc, getDoc } from 'firebase/firestore';
 import ClaimDialog from '../components/ClaimDialog';
 import ClaimForm from '../components/ClaimForm';
 
-
 export default function ClaimPage() {
   const { session, loading } = useSession();
   const [bankInfo, setBankInfo] = useState<any>(null);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [teamInfo, setTeamInfo] = useState<any>(null);
-  
+ 
   if (loading) {
     return <LinearProgress />;
   }
@@ -36,8 +35,8 @@ export default function ClaimPage() {
   const { user } = session;
 
   const currentDate = dayjs(); // Get the current date using dayjs
-  
-  const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success'>('confirm');
+ 
+  const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success' | 'error'>('confirm');
   const [openDialog, setOpenDialog] = useState(false);
 
   const [open, setOpen] = useState(false);
@@ -57,6 +56,11 @@ export default function ClaimPage() {
     receiptCount: 0,
     receipts: [{ date: '', description: '', amount: '', file: null }]
   });
+  const [submitTimestamp, setSubmitTimestamp] = useState<string>("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchInfo = async () => {
       if (session?.user?.email) {
@@ -76,8 +80,8 @@ export default function ClaimPage() {
         }
         if (userDoc.exists()) {
           setUserInfo(userDoc.data());
-          claimData.fullName = userDoc.data().fullName || ''; 
-          claimData.phoneNumber = userDoc.data().phoneNum || ''; 
+          claimData.fullName = userDoc.data().fullName || '';
+          claimData.phoneNumber = userDoc.data().phoneNum || '';
           claimData.icNum = userDoc.data().icNum || '';
         } else {
           setUserInfo(null); // No bank info found
@@ -92,9 +96,6 @@ export default function ClaimPage() {
 
     fetchInfo();
   }, [session?.user?.email]);
-
-  
-  
 
   const handleOpen = () => {
     if (!bankInfo || !userInfo) {
@@ -116,54 +117,53 @@ export default function ClaimPage() {
     }));
   };
 
-
   const handleReceiptChange = (index: number, field: string, value: any) => {
     const updatedReceipts = [...claimData.receipts];
     updatedReceipts[index][field] = value;
-    
+   
     const total = updatedReceipts.reduce((sum, receipt) => {
       const amount = parseFloat(receipt.amount);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-  
-    setClaimData(prev => ({ 
-      ...prev, 
+ 
+    setClaimData(prev => ({
+      ...prev,
       receipts: updatedReceipts,
       receiptCount: updatedReceipts.length,
       totalAmount: total, // <-- set total together
     }));
   };
-  
+ 
   const addReceipt = () => {
     if (claimData.receipts.length >= 50) {
       alert('You can only add up to 50 receipts.');
       return;
     }
     const newReceipts = [...claimData.receipts, { date: '', description: '', amount: '', file: null }];
-  
+ 
     const total = newReceipts.reduce((sum, receipt) => {
       const amount = parseFloat(receipt.amount);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-  
-    setClaimData(prev => ({ 
-      ...prev, 
+ 
+    setClaimData(prev => ({
+      ...prev,
       receipts: newReceipts,
       receiptCount: newReceipts.length,
       totalAmount: total,
     }));
-  }; 
-  
+  };
+ 
   const removeReceipt = (index: number) => {
     const newReceipts = claimData.receipts.filter((_, i) => i !== index);
-  
+ 
     const total = newReceipts.reduce((sum, receipt) => {
       const amount = parseFloat(receipt.amount);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
-  
-    setClaimData(prev => ({ 
-      ...prev, 
+ 
+    setClaimData(prev => ({
+      ...prev,
       receipts: newReceipts,
       receiptCount: newReceipts.length,
       totalAmount: total,
@@ -172,16 +172,17 @@ export default function ClaimPage() {
 
   const handleConfirmSubmit = async () => {
     setDialogState('loading');
+    setSubmitTimestamp(dayjs().format('YYYY-MM-DD HH:mm:ss'));
     console.log('Claim Data:', claimData);
     const isEmpty = (val: any) => val === null || val === '' || val === undefined;
-  
+ 
     const missingReceipts = claimData.receipts.some((receipt) => (
       isEmpty(receipt.date) ||
       isEmpty(receipt.amount) ||
       isEmpty(receipt.description) ||
       !receipt.file
     ));
-  
+ 
     if (
       isEmpty(claimData.claimType) ||
       isEmpty(claimData.unit) ||
@@ -194,54 +195,52 @@ export default function ClaimPage() {
       setOpenDialog(false);
       return;
     }
-  
+ 
     try {
       const response = await submitClaim(claimData);
       console.log('Response from submitClaim:', response);
-      
+     
       if (response.success) {
         setClaimData(prev => ({ ...prev, claimId: response.claimId }));
         setDialogState('success');
-  
       } else {
-        alert('Failed to submit claim. Please try again.');
+        setErrorMessage(response.message || 'Failed to submit claim.');
+        setDialogState('error');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error during claim submission:', error);
-      alert('An unexpected error occurred. Please try again.');
-      setOpenDialog(false);
+      setErrorMessage(error.message || 'An unexpected error occurred. Please try again or contact admin.');
+      setDialogState('error');
     }
-  
+ 
     console.log('Submitting claim:', claimData);
     setOpen(false);
   };  
 
   const resetDialog = () => {
-    setDialogState('confirm');
     setOpenDialog(false);
-    setOpen(false); // Add this to close the form dialog
+    setOpen(false);
     setClaimData({
       claimId: '',
       claimType: '',
       benefitType: '',
       unit: '',
-      fullName: userInfo?.fullName || '', // Use userInfo state to set the full name
+      fullName: userInfo?.fullName || '',
       email: user.email,
-      phoneNumber: userInfo?.phoneNum || '', // Use userInfo state to set the phone number
-      icNum: userInfo?.icNum || '', // Use userInfo state to set the IC number
-      bankHolder: bankInfo?.bankHolder || '', // Use bankInfo state to set the bank holder
-      bankName: bankInfo?.bankName || '', // Use bankInfo state to set the bank name
-      bankNum: bankInfo?.bankNum || '', // Use bankInfo state to set the bank number
+      phoneNumber: userInfo?.phoneNum || '',
+      icNum: userInfo?.icNum || '',
+      bankHolder: bankInfo?.bankHolder || '',
+      bankName: bankInfo?.bankName || '',
+      bankNum: bankInfo?.bankNum || '',
       totalAmount: 0,
       receiptCount: 0,
       receipts: [{ date: '', description: '', amount: '', file: null }]
     });
   };
-  
-
+ 
   const validateForm = () => {
     const requiredFields = ['unit', 'claimType', 'fullName', 'phoneNumber'];
-    
+   
     // Check if all required fields are filled
     for (const field of requiredFields) {
       if (!claimData[field]) {
@@ -249,32 +248,46 @@ export default function ClaimPage() {
         return false;
       }
     }
-  
+ 
     // Validate Receipts
     const missingReceiptFields = claimData.receipts.some((receipt) => (
       !receipt.date || !receipt.amount || !receipt.description || !receipt.file
     ));
-  
+ 
     if (missingReceiptFields) {
       alert("Please fill out all receipt fields and upload a file for each receipt.");
       return false;
     }
-  
+ 
     return true;
   };
-  
-  
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    console.log(claimData);
+ 
+  const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      setOpenDialog(true);
-    }
+    setDialogState('confirm'); // 进入确认状态
+    setOpenDialog(true);       // 打开弹窗
+  };
+
+  const handleFileChange = (index: number, file: File) => {
+    const updatedReceipts = [...claimData.receipts];
+    updatedReceipts[index].file = file;
+    setClaimData(prev => ({
+      ...prev,
+      receipts: updatedReceipts,
+    }));
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const handleOpenDialog = () => {
+    setDialogState('confirm');
+    setOpenDialog(true);
   };
 
   return (
     <>
-      
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
         <CardContent>
           <Typography variant="body1" color="text.secondary" component="div">
@@ -312,17 +325,20 @@ export default function ClaimPage() {
       <Button variant="contained" onClick={handleOpen}>
         Submit Claim
       </Button>
-      
+     
       <Dialog component="form" open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
         <DialogTitle>Submit a New Claim</DialogTitle>
         <ClaimForm
           data={claimData}
           onChange={handleChange}
           onReceiptChange={handleReceiptChange}
-          onFileChange={(index, file) => handleReceiptChange(index, 'file', file)}
+          onFileChange={handleFileChange}
           addReceipt={addReceipt}
           removeReceipt={removeReceipt}
-          
+          dialogOpen={dialogOpen}
+          onDialogClose={handleDialogClose}
+          snackbarOpen={snackbarOpen}
+          onSnackbarClose={handleSnackbarClose}
         />
         <DialogActions>
           <Button onClick={() => setOpen(false)}>Cancel</Button>
@@ -331,19 +347,38 @@ export default function ClaimPage() {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Confirmation and Success Dialog */}
       <ClaimDialog
         open={openDialog}
         state={dialogState}
+        claimId={claimData.claimId}
+        totalAmount={Number(claimData.totalAmount) || 0}
+        receiptCount={claimData.receipts?.length || 0}
+        submitTimestamp={submitTimestamp}
+        errorMessage={errorMessage}
         onCancel={() => setOpenDialog(false)}
         onConfirm={handleConfirmSubmit}
-        onCloseSuccess={resetDialog} // Add this line
-        claimId={claimData.claimId}
-        totalAmount={claimData.totalAmount}
-        receiptCount={claimData.receiptCount}
-        />
-
-      
+        onCloseSuccess={resetDialog}
+      />
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert severity="warning">
+          Are you sure you want to close the form? Unsaved changes will be lost.
+        </Alert>
+      </Snackbar>
     </>
   );
 }
+
+
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   TextField, MenuItem, Button, Box, Typography, Divider, IconButton, Dialog, DialogContent, DialogTitle, Snackbar, Alert
 } from '@mui/material';
@@ -7,9 +7,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
-import { useNavigate } from 'react-router-dom';
+import { onBlurFormatAmount, formatAmountWithComma } from '../utils/formatters';
 
-
+// Receipt type for each receipt item
 interface Receipt {
   date: string;
   description: string;
@@ -17,6 +17,8 @@ interface Receipt {
   file: File | null;
 }
 
+// Props for the presentation component
+// All data and actions are passed from parent (container) component
 interface Props {
   data: {
     claimType: string;
@@ -33,82 +35,44 @@ interface Props {
   onFileChange: (index: number, file: File | null) => void;
   addReceipt: () => void;
   removeReceipt: (index: number) => void;
+  // Dialog and Snackbar control are also passed from parent
+  dialogOpen?: boolean;
+  onDialogClose?: () => void;
+  snackbarOpen?: boolean;
+  onSnackbarClose?: () => void;
 }
 
+// Presentation component: only responsible for UI and user input
+// No side effects, no routing, no global state
 export default function ClaimForm({
   data,
   onChange,
   onReceiptChange,
   onFileChange,
   addReceipt,
-  removeReceipt
+  removeReceipt,
+  dialogOpen = false,
+  onDialogClose,
+  snackbarOpen = false,
+  onSnackbarClose
 }: Props) {
-  const navigate = useNavigate();
-  const [isDirty, setIsDirty] = React.useState(false);
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (isDirty) {
-        event.preventDefault();
-        event.returnValue = "Are you sure you want to leave? Unsaved changes will be lost.";
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [isDirty]);
-
-  const handleNavigation = (path: string) => {
-    if (isDirty) {
-      const confirmLeave = window.confirm("Are you sure you want to leave? Unsaved changes will be lost.");
-      if (!confirmLeave) return;
-    }
-    navigate(path);
-  };
-
-  const handleCloseForm = () => {
-    if (isDirty) {
-      const confirmLeave = window.confirm("Are you sure you want to close the form? Unsaved changes will be lost.");
-      if (!confirmLeave) return;
-    }
-    // Logic to close the form
-  };
-
-  const handleDialogClose = () => {
-    if (isDirty) {
-      setSnackbarOpen(true); // 显示提示
-      return;
-    }
-    setDialogOpen(false);
-  };
-
-  const handleConfirmClose = () => {
-    setDialogOpen(false); // 确定关闭
-    setSnackbarOpen(false); // 关闭提示
-  };
-
+  // Only render UI, all logic is handled by parent
   return (
     <Box display="flex" flexDirection="column" gap={2} mt={2} padding={2}>
+      {/* Claim type selection */}
       <TextField
         label="Claim Type"
         select
         fullWidth
         value={data.claimType}
-        onChange={(e) => {
-          setIsDirty(true); // 标记表单已修改
-          onChange('claimType', e.target.value);
-        }}
+        onChange={(e) => onChange('claimType', e.target.value)}
         required
       >
         <MenuItem value="General">General</MenuItem>
         <MenuItem value="Benefit">Benefit</MenuItem>
       </TextField>
 
+      {/* Benefit type only shown if claimType is Benefit */}
       {data.claimType === 'Benefit' && (
         <TextField
           label="Benefit Type"
@@ -128,6 +92,7 @@ export default function ClaimForm({
         </TextField>
       )}
 
+      {/* Company selection */}
       <TextField
         label="Company Name"
         select
@@ -136,6 +101,7 @@ export default function ClaimForm({
         onChange={(e) => onChange('unit', e.target.value)}
         required
       >
+        {/* Company options */}
         {[
           "UTOPIA HOLIDAY SDN BHD",
           "SCAFFOLDING MALAYSIA SDN BHD",
@@ -152,7 +118,8 @@ export default function ClaimForm({
           "MUTIARA EMBUN SDN BHD",
           "MERRY ELDERLY CARE SDN BHD",
           "COLD TRUCK MALAYSIA SDN BHD",
-          "MOBILE WHEELER SDN BHD"
+          "MOBILE WHEELER SDN BHD",
+          "⚠️ DON'T SELECT - FOR TESTING PURPOSES"
         ].map((unit) => (
           <MenuItem key={unit} value={unit}>
             {unit}
@@ -160,18 +127,15 @@ export default function ClaimForm({
         ))}
       </TextField>
 
+      {/* User info fields */}
       <TextField
         label="Full Name"
         fullWidth
         value={data.fullName}
-        onChange={(e) => {
-          setIsDirty(true); // 标记表单已修改
-          onChange('fullName', e.target.value);
-        }}
+        onChange={(e) => onChange('fullName', e.target.value)}
         required
         helperText="ℹ️ e.g. MUHAMMAD AHMAD BIN ABU BAKAR"
       />
-
       <TextField
         label="Phone Number"
         fullWidth
@@ -180,7 +144,6 @@ export default function ClaimForm({
         required
         helperText="ℹ️ Must start with 6, numbers only, no '-' symbol or spaces. e.g. 60123456789"
       />
-
       <TextField
         label="IC Number/Passport Number"
         fullWidth
@@ -190,11 +153,12 @@ export default function ClaimForm({
         helperText="ℹ️ Numbers only, no '-' symbol or spaces. e.g. 021012145041 or A12345678"
       />
 
+      {/* Receipts section */}
       <Typography variant="h6" mt={3}>Receipts</Typography>
-
       {data.receipts.map((receipt, index) => (
         <Box key={index} display="flex" flexDirection="column" gap={1} mt={1}>
           <Box display="flex" gap={2} alignItems="center">
+            {/* Date picker for receipt date */}
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 label="Receipt Date"
@@ -207,32 +171,19 @@ export default function ClaimForm({
                 slotProps={{ textField: { required: true } }}
               />
             </LocalizationProvider>
-
+            {/* Amount input, only number allowed */}
             <TextField
               label="Amount (RM)"
               type="number"
               value={receipt.amount}
-              onChange={(e) => {
-                let value = e.target.value;
-                // 只允许大于等于1且最多两位小数，或空值
-                if (
-                  value === '' ||
-                  (/^\d+(\.\d{0,2})?$/.test(value) && Number(value) >= 1)
-                ) {
-                  onReceiptChange(index, 'amount', value);
-                }
-              }}
-              onBlur={(e) => {
-                let value = e.target.value;
-                if (value !== '' && !isNaN(Number(value))) {
-                  // 格式化为两位小数
-                  onReceiptChange(index, 'amount', Number(value).toFixed(2));
-                }
-              }}
+              onChange={(e) => onReceiptChange(index, 'amount', e.target.value)}
+              onBlur={(e) =>
+                onReceiptChange(index, 'amount', onBlurFormatAmount(e.target.value))
+              }
               required
               inputProps={{ min: 1, step: "0.01" }}
             />
-
+            {/* Remove receipt button */}
             <IconButton
               onClick={() => removeReceipt(index)}
               disabled={data.receipts.length === 1}
@@ -240,7 +191,7 @@ export default function ClaimForm({
               <RemoveCircleOutline />
             </IconButton>
           </Box>
-
+          {/* File upload for receipt */}
           <Button
             variant="outlined"
             component="label"
@@ -248,14 +199,14 @@ export default function ClaimForm({
           >
             {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF)"}
             <input
-              accept="image/*,application/pdf" // 支持图片和 PDF 文件
-              capture="environment" // 启用手机摄像头或文件选择器
+              accept="image/*,application/pdf"
+              capture="environment"
               type="file"
               hidden
               onChange={(e) => onFileChange(index, e.target.files?.[0] || null)}
             />
           </Button>
-
+          {/* Description for receipt */}
           <TextField
             label="Description"
             fullWidth
@@ -266,11 +217,10 @@ export default function ClaimForm({
             required
             helperText="ℹ️ e.g. Grab - Meeting at Ibnu Sina Warehouse on xx/xx/xxxx"
           />
-
           {index < data.receipts.length - 1 && <Divider />}
         </Box>
       ))}
-
+      {/* Add more receipts button */}
       <Button
         startIcon={<AddCircleOutline />}
         onClick={addReceipt}
@@ -292,15 +242,14 @@ export default function ClaimForm({
       >
         Add More Receipt
       </Button>
-
+      {/* Total amount display, formatted with comma */}
       <Typography align="right" fontWeight="bold" mt={2}>
-        Total Amount: RM {data.totalAmount.toFixed(2)}
+        Total Amount: RM {formatAmountWithComma(data.totalAmount)}
       </Typography>
-
-      {/* Dialog */}
+      {/* Dialog for form actions, controlled by parent */}
       <Dialog
         open={dialogOpen}
-        onClose={handleDialogClose}
+        onClose={onDialogClose}
         fullWidth
         maxWidth="md"
       >
@@ -310,23 +259,22 @@ export default function ClaimForm({
             <Typography variant="h6">Receipts</Typography>
             {data.receipts.map((receipt, index) => (
               <Box key={index} display="flex" flexDirection="column" gap={1}>
-                {/* Receipt fields */}
+                {/* Receipt fields for dialog, can be customized */}
               </Box>
             ))}
           </Box>
         </DialogContent>
       </Dialog>
-
-      {/* Snackbar */}
+      {/* Snackbar for warning, controlled by parent */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={onSnackbarClose}
       >
         <Alert
           severity="warning"
           action={
-            <Button color="inherit" size="small" onClick={handleConfirmClose}>
+            <Button color="inherit" size="small" onClick={onSnackbarClose}>
               Confirm
             </Button>
           }

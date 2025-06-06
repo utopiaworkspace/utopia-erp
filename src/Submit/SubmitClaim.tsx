@@ -44,6 +44,7 @@ export async function submitClaim(claimData: any) {
 
 
     claimData.receipts = receiptsWithBase64;
+    claimData.totalAmount = Number(claimData.totalAmount);
 
     console.log("Submitting claim data:", claimData);
 
