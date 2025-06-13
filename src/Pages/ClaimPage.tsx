@@ -338,7 +338,7 @@ export default function ClaimPage() {
             <br />
             After submission, a <strong>Claim ID</strong> will be shown.
             <br />
-            <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it.</span>
+            <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it</span>
             <br />
             <span style={{ color: '#d32f2f', fontWeight: 600 }}>🚫 No original receipt = No process</span>
           </Typography>

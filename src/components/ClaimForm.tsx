@@ -2,7 +2,7 @@ import React from 'react';
 import {
   TextField, MenuItem, Button, Box, Typography, Divider, IconButton, Dialog, DialogContent, DialogTitle, Snackbar, Alert
 } from '@mui/material';
-import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
+import { AddCircleOutline, RemoveCircleOutline, CameraAlt, UploadFile } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -208,23 +208,36 @@ export default function ClaimForm({
             </IconButton>
           </Box>
           {/* File upload for receipt */}
-          <Button
-            variant="outlined"
-            component="label"
-            fullWidth
-          >
-            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF)"}
+          <Box sx={{ position: 'relative', width: '100%', mb: 1 }}>
+            <Button
+              variant="outlined"
+              startIcon={<UploadFile />}
+              fullWidth
+              component="span"
+              sx={{ position: 'relative', zIndex: 1 }}
+            >
+              {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF) *"}
+            </Button>
             <input
               accept="image/*,application/pdf"
-              capture="environment"
               type="file"
-              hidden
+              required
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                width: '100%',
+                height: '100%',
+                opacity: 0,
+                cursor: 'pointer',
+                zIndex: 2
+              }}
               onChange={(e) => {
                 onFileChange(index, e.target.files?.[0] || null);
-                setIsDirty(true);
               }}
+              tabIndex={-1}
             />
-          </Button>
+          </Box>
           {/* Description for receipt */}
           <TextField
             label="Description"
