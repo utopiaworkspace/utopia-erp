@@ -121,7 +121,7 @@ export default function ClaimForm({
           "MERRY ELDERLY CARE SDN BHD",
           "COLD TRUCK MALAYSIA SDN BHD",
           "MOBILE WHEELER SDN BHD",
-          "ENCIK SKYLIFT & CRANE SDN BHD"，
+          "ENCIK SKYLIFT & CRANE SDN BHD",
           "⚠️ DON'T SELECT - FOR TESTING PURPOSES"
         ].map((unit) => (
           <MenuItem key={unit} value={unit}>
