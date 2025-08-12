@@ -122,7 +122,7 @@ export default function ClaimForm({
           "COLD TRUCK MALAYSIA SDN BHD",
           "MOBILE WHEELER SDN BHD",
           "ENCIK SKYLIFT & CRANE SDN BHD"
-          "⚠️ DON'T SELECT - FOR TESTING PURPOSES"
+          "DON'T SELECT - FOR TESTING PURPOSES"
         ].map((unit) => (
           <MenuItem key={unit} value={unit}>
             {unit}
