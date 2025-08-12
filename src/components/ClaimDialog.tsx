@@ -61,7 +61,7 @@ export default function ClaimDialog({ open, state, onCancel, onConfirm, onCloseS
               <br />
               Your Claim ID: <strong>{claimId}</strong>
               <br />
-              Submitted Aat: {submitTimestamp ? submitTimestamp : <span style={{color: 'd32f2f'}}>No timestamp</span>}
+              Submitted at: {submitTimestamp ? submitTimestamp : <span style={{color: 'd32f2f'}}>No timestamp</span>}
               <br />
               <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it.</span>
               <br />

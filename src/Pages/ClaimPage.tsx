@@ -19,6 +19,7 @@ import { db } from '../firebase/firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import ClaimDialog from '../components/ClaimDialog';
 import ClaimForm from '../components/ClaimForm';
+import { useTheme } from '@mui/material/styles';
 
 export default function ClaimPage() {
   const { session, loading } = useSession();
@@ -308,6 +309,8 @@ export default function ClaimPage() {
     setShowLeaveDialog(false);
   };
 
+  const theme = useTheme();
+
   return (
     <>
       <Card sx={{ maxWidth: 600, width: '100%', p: 3, boxShadow: 3, mx: 'auto', my: 4 }}>
@@ -318,10 +321,69 @@ export default function ClaimPage() {
               <li>General Claim: For general expenses.</li>
               <li>Benefit Claim: For specific benefits provided by the company.</li>
             </ul>
-            <br />
+          </Typography>
+
+          {/* Important Notice Box - 移到这里 */}
+          <Box
+            mb={2}
+            p={2}
+            sx={{
+              background: '#fffbe6',
+              borderRadius: 2,
+              border: '1px solid #ffe58f',
+              maxWidth: 500, // 你可以调整为你想要的宽度，比如 400、450、500
+              mx: 'auto',    // 居中
+            }}
+          >
+            <Typography variant="subtitle1" fontWeight="bold" color="warning.main" gutterBottom>
+              ⚠️ Important Notice on Benefit Eligibility:
+            </Typography>
+            <Typography
+              variant="body2"
+              gutterBottom
+              sx={{
+                color: theme => theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.grey[900]
+              }}
+            >
+              Benefit eligibility depends on your employment type and business unit.<br />
+              Not all benefits apply to all employees.
+            </Typography>
+            <Typography
+              variant="body2"
+              gutterBottom
+              sx={{
+                color: theme => theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.grey[900]
+              }}
+            >
+              👉 Please check the full policy list here:
+              <Button
+                href="https://drive.google.com/file/d/1-2_e_XU5_K_qTxmQQyesDjL2BF0a3y-A/view"
+                target="_blank"
+                rel="noopener"
+                size="small"
+                sx={{ ml: 1, textTransform: 'none', fontWeight: 600 }}
+              >
+                View Staff Benefit Policies - English Version
+              </Button>
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: theme => theme.palette.mode === 'dark' ? theme.palette.grey[100] : theme.palette.grey[900]
+              }}
+            >
+              If you're unsure, contact HR before submitting your claim.
+            </Typography>
+          </Box>
+
+          <Typography variant="body1" color="text.secondary" component="div" sx={{ mt: 2 }}>
             📌 Phase 1: Submission only. History and tracking will be added soon.
-            <br /><br />
-            <strong>Steps:</strong>
+          </Typography>
+
+          <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 3 }}>
+            Steps:
+          </Typography>
+          <Typography variant="body1" color="text.secondary" component="div">
             <ol style={{ paddingLeft: 20, margin: 0 }}>
               <li>Snap and upload your receipts here.</li>
               <li>Paste the original receipts on an A4 paper.</li>
@@ -335,12 +397,15 @@ export default function ClaimPage() {
               </li>
               <li>Submit the A4 paper with the original receipts to the Finance Department (Mailbox at Utopia Main Office).</li>
             </ol>
-            <br />
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mt: 3 }}>
             After submission, a <strong>Claim ID</strong> will be shown.
-            <br />
-            <span style={{ color: '#d97706', fontWeight: 600 }}>📸 Please screenshot and save it</span>
-            <br />
-            <span style={{ color: '#d32f2f', fontWeight: 600 }}>🚫 No original receipt = No process</span>
+            <Box component="span" sx={{ display: 'block', color: 'warning.main', fontWeight: 600, mt: 0.25 }}>
+              📸 Please screenshot and save it
+            </Box>
+            <Box component="span" sx={{ display: 'block', color: 'error.main', fontWeight: 600, mt: 0.25 }}>
+              🚫 No original receipt = No process ！
+            </Box>
           </Typography>
         </CardContent>
       </Card>

@@ -104,12 +104,14 @@ export default function ClaimForm({
         {/* Company options */}
         {[
           "UTOPIA HOLIDAY SDN BHD",
-          "SCAFFOLDING MALAYSIA SDN BHD",
           "IBNU SINA CARE SDN BHD",
+          "SCAFFOLDING MALAYSIA SDN BHD",
+          "KAK KENDURI SDN BHD",
           "REV MOVE SDN BHD",
           "REV MOVE UTARA SDN BHD",
-          "KAK KENDURI SDN BHD",
           "ENCIK BEKU AIRCOND SDN BHD",
+          "ENCIK BEKU AIRCOND N9 SDN BHD",
+          "ENCIK BEKU AIRCOND SELATAN SDN BHD",
           "BUTIK GLAM & LUX SDN BHD",
           "PULSE PILATES SDN BHD",
           "ANJAKAN STRATEGIK SDN BHD",
@@ -119,6 +121,7 @@ export default function ClaimForm({
           "MERRY ELDERLY CARE SDN BHD",
           "COLD TRUCK MALAYSIA SDN BHD",
           "MOBILE WHEELER SDN BHD",
+          "ENCIK SKYLIFT & CRANE SDN BHD"
           "⚠️ DON'T SELECT - FOR TESTING PURPOSES"
         ].map((unit) => (
           <MenuItem key={unit} value={unit}>
