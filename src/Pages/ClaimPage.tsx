@@ -54,7 +54,8 @@ export default function ClaimPage() {
     bankNum: '',
     totalAmount: 0,
     receiptCount: 0,
-    receipts: [{ date: '', description: '', amount: '', file: null }]
+    // receipts: [{ date: '', description: '', amount: '', file: null }] 
+    receipts: [{ date: '', description: '', amount: '', files: [] }]
   });
   const [submitTimestamp, setSubmitTimestamp] = useState<string>("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -141,26 +142,58 @@ export default function ClaimPage() {
     setIsDirty(true);
   };
  
+  // const addReceipt = () => {
+  //   if (claimData.receipts.length >= 50) {
+  //     alert('You can only add up to 50 receipts.');
+  //     return;
+  //   }
+  //   const newReceipts = [...claimData.receipts, { date: '', description: '', amount: '', file: null }];
+ 
+  //   const total = newReceipts.reduce((sum, receipt) => {
+  //     const amount = parseFloat(receipt.amount);
+  //     return sum + (isNaN(amount) ? 0 : amount);
+  //   }, 0);
+ 
+  //   setClaimData(prev => ({
+  //     ...prev,
+  //     receipts: newReceipts,
+  //     receiptCount: newReceipts.length,
+  //     totalAmount: total,
+  //   }));
+  //   setIsDirty(true);
+  // };
+
   const addReceipt = () => {
-    if (claimData.receipts.length >= 50) {
-      alert('You can only add up to 50 receipts.');
-      return;
+  if (claimData.receipts.length >= 50) {
+    alert('You can only add up to 50 receipts.');
+    return;
+  }
+
+  const newReceipts = [
+    ...claimData.receipts,
+    {
+      date: '',
+      description: '',
+      amount: '',
+      files: [] // ✅ initialize this properly
     }
-    const newReceipts = [...claimData.receipts, { date: '', description: '', amount: '', file: null }];
- 
-    const total = newReceipts.reduce((sum, receipt) => {
-      const amount = parseFloat(receipt.amount);
-      return sum + (isNaN(amount) ? 0 : amount);
-    }, 0);
- 
-    setClaimData(prev => ({
-      ...prev,
-      receipts: newReceipts,
-      receiptCount: newReceipts.length,
-      totalAmount: total,
-    }));
-    setIsDirty(true);
-  };
+  ];
+
+  const total = newReceipts.reduce((sum, receipt) => {
+    const amount = parseFloat(receipt.amount);
+    return sum + (isNaN(amount) ? 0 : amount);
+  }, 0);
+
+  setClaimData(prev => ({
+    ...prev,
+    receipts: newReceipts,
+    receiptCount: newReceipts.length,
+    totalAmount: total,
+  }));
+
+  setIsDirty(true);
+};
+
  
   const removeReceipt = (index: number) => {
     const newReceipts = claimData.receipts.filter((_, i) => i !== index);
@@ -243,7 +276,8 @@ export default function ClaimPage() {
       bankNum: bankInfo?.bankNum || '',
       totalAmount: 0,
       receiptCount: 0,
-      receipts: [{ date: '', description: '', amount: '', file: null }]
+      // receipts: [{ date: '', description: '', amount: '', file: null }]
+      receipts: [{ date: '', description: '', amount: '', files: [] }]
     });
     setIsDirty(false);
   };
@@ -278,15 +312,26 @@ export default function ClaimPage() {
     setOpenDialog(true);       // 打开弹窗
   };
 
-  const handleFileChange = (index: number, file: File) => {
-    const updatedReceipts = [...claimData.receipts];
-    updatedReceipts[index].file = file;
-    setClaimData(prev => ({
-      ...prev,
-      receipts: updatedReceipts,
-    }));
-    setIsDirty(true);
-  };
+  // const handleFileChange = (index: number, file: File) => {
+  //   const updatedReceipts = [...claimData.receipts];
+  //   updatedReceipts[index].file = file;
+  //   setClaimData(prev => ({
+  //     ...prev,
+  //     receipts: updatedReceipts,
+  //   }));
+  //   setIsDirty(true);
+  // };
+
+  const handleFileChange = (index: number, files: File[]) => {
+  const updatedReceipts = [...claimData.receipts];
+  updatedReceipts[index].files = files;
+  setClaimData(prev => ({
+    ...prev,
+    receipts: updatedReceipts
+  }));
+  setIsDirty(true);
+};
+
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);

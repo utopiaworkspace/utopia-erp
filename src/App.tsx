@@ -19,6 +19,7 @@ import {
   onAuthStateChanged,
 } from './firebase/auth';
 import SessionContext, { type Session } from './SessionContext';
+import { History } from '@mui/icons-material';
 
 const NAVIGATION: Navigation = [
   {
@@ -36,6 +37,11 @@ const NAVIGATION: Navigation = [
     segment: 'claims',
     title: 'Claims',
     icon: <ReceiptLongIcon />,
+  },
+  {
+    segment: 'claims-tracking',
+    title: 'Claim Tracking',
+    icon: <History />,
   },
   {
     segment: 'incidents',

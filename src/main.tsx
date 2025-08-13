@@ -15,6 +15,7 @@ import VehicleDashboardLayout from './Layout/ChildLayout';
 import ChildLayout from './Layout/ChildLayout';
 import RMBEvent from './RMB/RMBEvent';
 import VehicleEventDetails from './Pages/VehicleEventDetails';
+import ClaimTrackingPage from './Pages/ClaimTracking';
 
 
 const router = createBrowserRouter([
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
           {
             path: '/claims',
             Component: ClaimPage,
+          },
+          {
+            path: '/claims-tracking',
+            Component: ClaimTrackingPage,
           },
           {
             path: '/incidents',

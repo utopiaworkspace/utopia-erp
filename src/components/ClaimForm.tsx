@@ -14,7 +14,9 @@ interface Receipt {
   date: string;
   description: string;
   amount: string;
-  file: File | null;
+  // file: File | null;
+  files: (File | null)[];
+
 }
 
 // Props for the presentation component
@@ -32,8 +34,10 @@ interface Props {
   };
   onChange: (field: string, value: any) => void;
   onReceiptChange: (index: number, field: string, value: any) => void;
-  onFileChange: (index: number, file: File | null) => void;
-  addReceipt: () => void;
+  // onFileChange: (index: number, file: File | null) => void;
+  // onFileChange: (receiptIndex: number, fileIndex: number, file: File | null) => void; 
+  onFileChange: (receiptIndex: number, files: File[]) => void;
+  addReceipt: () => void; 
   removeReceipt: (index: number) => void;
   // Dialog and Snackbar control are also passed from parent
   dialogOpen?: boolean;
@@ -208,13 +212,17 @@ export default function ClaimForm({
             </IconButton>
           </Box>
           {/* File upload for receipt */}
-          <Button
+          {/* <Button
             variant="outlined"
             component="label"
             fullWidth
-          >
-            {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF)"}
-            <input
+          > */}
+            {/* {receipt.file ? `File: ${receipt.file.name}` : "Upload Receipt (Image or PDF)"} */}
+            {/* {receipt.files && receipt.files.length > 0
+            ? `Files: ${receipt.files.map((f) => f.name).join(", ")}`
+            : "Upload Receipts (up to 6 files)"} */}
+            
+            {/* <input
               accept="image/*,application/pdf"
               capture="environment"
               type="file"
@@ -223,8 +231,69 @@ export default function ClaimForm({
                 onFileChange(index, e.target.files?.[0] || null);
                 setIsDirty(true);
               }}
+            /> */}
+
+            {/* <input
+              accept="image/*,application/pdf"
+              capture="environment"
+              type="file"
+              hidden
+              multiple
+              onChange={(e) => {
+                const files = Array.from(e.target.files || []).slice(0, 6); // limit to 6 files
+                onFileChange(index, files);
+                setIsDirty(true);
+              }}
             />
-          </Button>
+          </Button> */}
+
+              {/* Show existing uploaded files with remove option */}
+          {receipt.files.map((file, fileIndex) => (
+            <Box key={fileIndex} display="flex" alignItems="center" mt={1}>
+              <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                File {fileIndex + 1}: {file?.name}
+              </Typography>
+              <IconButton
+                color="error"
+                onClick={() => {
+                  const updatedFiles = receipt.files.filter((_, i) => i !== fileIndex);
+                  onFileChange(index, updatedFiles);
+                  setIsDirty(true);
+                }}
+              >
+                <RemoveCircleOutline />
+              </IconButton>
+            </Box>
+          ))}
+
+          {/* Upload button to add another file if total < 6 */}
+          {receipt.files.length < 6 && (
+            <Button
+              variant="outlined"
+              component="label"
+              fullWidth
+              sx={{ mt: 1 }}
+            >
+              {receipt.files.length === 0
+                ? "Upload Receipt (Image or PDF) *Up to 6 files"
+                : "Add Another File"}
+              <input
+                accept="image/*,application/pdf"
+                capture="environment"
+                type="file"
+                hidden
+                onChange={(e) => {
+                  const newFile = e.target.files?.[0];
+                  if (newFile) {
+                    const updatedFiles = [...receipt.files, newFile].slice(0, 6);
+                    onFileChange(index, updatedFiles);
+                    setIsDirty(true);
+                  }
+                }}
+              />
+            </Button>
+          )}
+
           {/* Description for receipt */}
           <TextField
             label="Description"

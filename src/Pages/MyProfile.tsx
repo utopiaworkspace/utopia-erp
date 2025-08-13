@@ -48,10 +48,11 @@ export default function MyProfile() {
   const units = [
     "UTOPIA HOLIDAY SDN BHD", "SCAFFOLDING MALAYSIA SDN BHD (SMB)", "IBNU SINA CARE SDN BHD",
     "REV MOVE SDN BHD (RMB)", "REV MOVE UTARA SDN BHD (RMU)", "KAK KENDURI SDN BHD (KMB)",
-    "ENCIK BEKU AIRCOND SDN BHD", "BUTIK GLAM & LUX SDN BHD", "PULSE PILATES SDN BHD",
+    "ENCIK BEKU AIRCOND SDN BHD", "ENCIK BEKU AIRCOND N9 SDN BHD", "ENCIK BEKU AIRCOND SELATAN SDN BHD",
+    "BUTIK GLAM & LUX SDN BHD", "PULSE PILATES SDN BHD",
     "ANJAKAN STRATEGIK SDN BHD", "MIMPIAN ASTAKA SDN BHD", "MEKAR BUDI SDN BHD",
     "MUTIARA EMBUN SDN BHD", "MERRY ELDERLY CARE SDN BHD", "COLD TRUCK MALAYSIA SDN BHD",
-    "MOBILE WHEELER SDN BHD", "OTHER"
+    "MOBILE WHEELER SDN BHD", "ENCIK SKYLIFT & CRANE SDN BHD", "OTHER"
   ];
   const depts = [
     "Operation",
@@ -69,6 +70,13 @@ export default function MyProfile() {
 
   if (loading) return <LinearProgress />;
   if (!session) return <Navigate to="/sign-in" state={{ from: location }} />;
+
+  const banks = [
+  "MAYBANK", "CIMB", "RHB", "PUBLIC BANK", "BANK ISLAM", "HONG LEONG BANK", 
+  "BANK RAKYAT", "AMBANK", "UOB", "OCBC", "BSN", "HSBC", 
+  "AFFIN BANK", "ALLIANCE BANK", "STANDARD CHARTERED", "OTHER"
+];
+
 
   const { user } = session;
 
@@ -263,7 +271,37 @@ export default function MyProfile() {
 
         <Typography variant="h6">Bank Information</Typography>
         <TextField label="Bank Account Holder Name" name="bankHolder" value={bankInfo?.bankHolder || ''} onChange={handleBankChange} fullWidth />
-        <TextField label="Bank Name" name="bankName" value={bankInfo?.bankName || ''} onChange={handleBankChange} fullWidth />
+        {/* <TextField label="Bank Name" name="bankName" value={bankInfo?.bankName || ''} onChange={handleBankChange} fullWidth /> */}
+        <Autocomplete
+          options={banks}
+          value={bankInfo?.bankName || ''}
+          onChange={(_, newValue) =>
+            setBankInfo((prev) => ({ ...prev, bankName: newValue }))
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Bank Name"
+              name="bankName"
+              fullWidth
+              required
+            />
+          )}
+          disableClearable
+        />
+
+        {bankInfo?.bankName === 'OTHER' && (
+          <TextField
+            label="Other Bank Name"
+            name="customBankName"
+            value={bankInfo?.customBankName || ''}
+            onChange={(e) =>
+              setBankInfo({ ...bankInfo, customBankName: e.target.value.toUpperCase() })
+            }
+            fullWidth
+            helperText="Please specify the name of your bank"
+          />
+        )}
         <TextField
           label="Bank Account Number"
           name="bankNum"
