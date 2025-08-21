@@ -395,7 +395,7 @@ export default function ClaimPage() {
                   <li>Claim ID</li>
                 </ul>
               </li>
-              <li>Submit the A4 paper with the original receipts to the Finance Department (Mailbox at Utopia Main Office).</li>
+              <li>Submit the A4 paper with the original receipts to the Finance Department (Mailbox located at Utopia Main Office).</li>
             </ol>
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mt: 3 }}>
