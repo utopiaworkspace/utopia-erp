@@ -1,4 +1,5 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect } from 'react'; // ← removed stray `use`
+
 import {
   Typography, Button, Dialog, DialogTitle, DialogContent,
   DialogActions, TextField, MenuItem, Grid, IconButton, Card, CardContent, Snackbar, Alert
@@ -7,25 +8,61 @@ import { AddCircleOutline, RemoveCircleOutline } from '@mui/icons-material';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { submitClaim } from '../Submit/SubmitClaim';
 import { useSession } from '../SessionContext';
 import LinearProgress from '@mui/material/LinearProgress';
-import { Navigate, useLocation } from 'react-router';
+
+// ❌ OLD
+// import { Navigate, useLocation } from 'react-router';
+// ✅ NEW
+import { Navigate, useLocation } from 'react-router-dom';
+
 import { CircularProgress } from '@mui/material';
-import { db } from '../firebase/firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+
+// ❌ OLD (Firebase)
+// import { db } from '../firebase/firebaseConfig';
+// import { doc, getDoc } from 'firebase/firestore';
+
+// ✅ NEW (Supabase)
+import { supabase } from '../supabase/supabaseClient';
+
 import ClaimDialog from '../components/ClaimDialog';
 import ClaimForm from '../components/ClaimForm';
 
+type ProfileRow = {
+  id: string;
+  email: string | null;
+  full_name: string | null;
+  phone_num: string | null;
+  ic_num: string | null;
+  bank_holder: string | null;
+  bank_name: string | null;
+  bank_num: string | null;
+  units: string[] | null;
+  dept: string | null;
+  position: string | null;
+};
+
 export default function ClaimPage() {
   const { session, loading } = useSession();
-  const [bankInfo, setBankInfo] = useState<any>(null);
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [teamInfo, setTeamInfo] = useState<any>(null);
- 
+
+  // ✅ ensure we have location since <Navigate> uses it
+  const location = useLocation();
+
+  // ❌ OLD (Firestore-based personal info)
+  // const [bankInfo, setBankInfo] = useState<any>(null);
+  // const [userInfo, setUserInfo] = useState<any>(null);
+  // const [teamInfo, setTeamInfo] = useState<any>(null);
+
+  // ✅ NEW (Supabase-based)
+  const [uid, setUid] = useState<string | null>(null);
+  const [profile, setProfile] = useState<ProfileRow | null>(null);
+  const [profileMissing, setProfileMissing] = useState<string[]>([]);
+  const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
+
   if (loading) {
     return <LinearProgress />;
   }
@@ -34,8 +71,6 @@ export default function ClaimPage() {
   }
   const { user } = session;
 
-  const currentDate = dayjs(); // Get the current date using dayjs
- 
   const [dialogState, setDialogState] = useState<'confirm' | 'loading' | 'success' | 'error'>('confirm');
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -54,8 +89,7 @@ export default function ClaimPage() {
     bankNum: '',
     totalAmount: 0,
     receiptCount: 0,
-    // receipts: [{ date: '', description: '', amount: '', file: null }] 
-    receipts: [{ date: '', description: '', amount: '', files: [] }]
+    receipts: [{ date: '', description: '', amount: '', files: [] as File[] }]
   });
   const [submitTimestamp, setSubmitTimestamp] = useState<string>("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -63,45 +97,127 @@ export default function ClaimPage() {
   const [isDirty, setIsDirty] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
 
+  // ✅ get a guaranteed Supabase UID (prevents "uuid: undefined")
   useEffect(() => {
-    const fetchInfo = async () => {
-      if (session?.user?.email) {
-        const bankRef = doc(db, 'bankinfo', session.user.email);
-        const userRef = doc(db, 'users', session.user.email);
-        const teamRef = doc(db, 'teaminfo', session.user.email);
-        const bankDoc = await getDoc(bankRef);
-        const userDoc = await getDoc(userRef);
-        const teamDoc = await getDoc(teamRef);
-        if (bankDoc.exists()) {
-          setBankInfo(bankDoc.data());
-          claimData.bankHolder = bankDoc.data().bankHolder || '';
-          claimData.bankName = bankDoc.data().bankName || '';
-          claimData.bankNum = bankDoc.data().bankNum || '';
-        } else {
-          setBankInfo(null); // No bank info found
-        }
-        if (userDoc.exists()) {
-          setUserInfo(userDoc.data());
-          claimData.fullName = userDoc.data().fullName || '';
-          claimData.phoneNumber = userDoc.data().phoneNum || '';
-          claimData.icNum = userDoc.data().icNum || '';
-        } else {
-          setUserInfo(null); // No bank info found
-        }
-        if (teamDoc.exists()) {
-          setTeamInfo(teamDoc.data());
-        } else {
-          setTeamInfo(null); // No bank info found
-        }
+    (async () => {
+      try {
+        const { data, error } = await supabase.auth.getUser();
+        if (error) throw error;
+        setUid(data.user?.id ?? null);
+      } catch (e) {
+        console.error('Failed to get Supabase user:', e);
+        setUid(null);
       }
-    };
+    })();
+  }, []);
 
-    fetchInfo();
-  }, [session?.user?.email]);
+  // ❌ OLD — Firestore lookups (blocked by Firebase rules after migration)
+  // useEffect(() => {
+  //   const fetchInfo = async () => {
+  //     if (session?.user?.email) {
+  //       const bankRef = doc(db, 'bankinfo', session.user.email);
+  //       const userRef = doc(db, 'users', session.user.email);
+  //       const teamRef = doc(db, 'teaminfo', session.user.email);
+  //       const bankDoc = await getDoc(bankRef);
+  //       const userDoc = await getDoc(userRef);
+  //       const teamDoc = await getDoc(teamRef);
+  //       if (bankDoc.exists()) {
+  //         setBankInfo(bankDoc.data());
+  //         claimData.bankHolder = bankDoc.data().bankHolder || '';
+  //         claimData.bankName = bankDoc.data().bankName || '';
+  //         claimData.bankNum = bankDoc.data().bankNum || '';
+  //       } else {
+  //         setBankInfo(null);
+  //       }
+  //       if (userDoc.exists()) {
+  //         setUserInfo(userDoc.data());
+  //         claimData.fullName = userDoc.data().fullName || '';
+  //         claimData.phoneNumber = userDoc.data().phoneNum || '';
+  //         claimData.icNum = userDoc.data().icNum || '';
+  //       } else {
+  //         setUserInfo(null);
+  //       }
+  //       if (teamDoc.exists()) {
+  //         setTeamInfo(teamDoc.data());
+  //       } else {
+  //         setTeamInfo(null);
+  //       }
+  //     }
+  //   };
+  //   fetchInfo();
+  // }, [session?.user?.email]);
+
+  // ✅ NEW — read profile from Supabase and prefill claim form
+  useEffect(() => {
+    if (!uid) return;
+
+    (async () => {
+      setLoadingProfile(true);
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id,email,full_name,phone_num,ic_num,bank_holder,bank_name,bank_num,units,dept,position')
+          .eq('id', uid)
+          .maybeSingle<ProfileRow>();
+
+        if (error) throw error;
+
+        setProfile(data ?? null);
+
+        // compute missing fields (tweak list as needed)
+        const required: Array<[keyof ProfileRow, string]> = [
+          ['full_name', 'Full Name'],
+          ['phone_num', 'Phone Number'],
+          ['ic_num', 'IC / Passport No.'],
+          ['bank_holder', 'Bank Account Holder'],
+          ['bank_name', 'Bank Name'],
+          ['bank_num', 'Bank Account Number'],
+        ];
+        const missing = required
+          .filter(([k]) => {
+            const v = (data as any)?.[k];
+            return !v || (typeof v === 'string' && v.trim() === '');
+          })
+          .map(([, label]) => label);
+        setProfileMissing(missing);
+
+        // prefill claim form fields from profile
+        setClaimData(prev => ({
+          ...prev,
+          fullName: data?.full_name ?? '',
+          phoneNumber: data?.phone_num ?? '',
+          icNum: data?.ic_num ?? '',
+          bankHolder: data?.bank_holder ?? '',
+          bankName: data?.bank_name ?? '',
+          bankNum: data?.bank_num ?? '',
+          // if you need unit/department defaults:
+          unit: (data?.units && data.units[0]) ? data.units[0] : prev.unit,
+        }));
+      } catch (e: any) {
+        console.error('Supabase profile fetch failed:', {
+          message: e?.message, code: e?.code, details: e?.details, hint: e?.hint,
+        });
+        setProfile(null);
+        setProfileMissing(['Full Name','Phone Number','IC / Passport No.','Bank Account Holder','Bank Name','Bank Account Number']);
+      } finally {
+        setLoadingProfile(false);
+      }
+    })();
+  }, [uid]);
 
   const handleOpen = () => {
-    if (!bankInfo || !userInfo) {
-      alert('Please update your personal information before submitting a claim.');
+    // ❌ OLD
+    // if (!bankInfo || !userInfo) {
+    //   alert('Please update your personal information before submitting a claim.');
+    //   return;
+    // }
+
+    // ✅ NEW — gate by Supabase profile completeness
+    if (profileMissing.length > 0) {
+      alert(
+        `Please update your personal information before submitting a claim:\n\n` +
+        profileMissing.map(m => `• ${m}`).join('\n')
+      );
       return;
     }
     setOpen(true);
@@ -109,9 +225,9 @@ export default function ClaimPage() {
 
   const handleDialogClose = (event, reason) => {
     if (isDirty) {
-      setShowLeaveDialog(true); // 弹出确认提示
+      setShowLeaveDialog(true);
     } else {
-      setOpenDialog(false); // 直接关闭
+      setOpenDialog(false);
     }
   };
 
@@ -119,7 +235,7 @@ export default function ClaimPage() {
     setClaimData((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === 'claimType' && value === 'General' ? { benefitType: '' } : {}), // Clear benefitType if claimType is empty
+      ...(field === 'claimType' && value === 'General' ? { benefitType: '' } : {}),
     }));
     setIsDirty(true);
   };
@@ -127,82 +243,54 @@ export default function ClaimPage() {
   const handleReceiptChange = (index: number, field: string, value: any) => {
     const updatedReceipts = [...claimData.receipts];
     updatedReceipts[index][field] = value;
-   
+
     const total = updatedReceipts.reduce((sum, receipt) => {
       const amount = parseFloat(receipt.amount);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
- 
+
     setClaimData(prev => ({
       ...prev,
       receipts: updatedReceipts,
       receiptCount: updatedReceipts.length,
-      totalAmount: total, // <-- set total together
+      totalAmount: total,
     }));
     setIsDirty(true);
   };
- 
-  // const addReceipt = () => {
-  //   if (claimData.receipts.length >= 50) {
-  //     alert('You can only add up to 50 receipts.');
-  //     return;
-  //   }
-  //   const newReceipts = [...claimData.receipts, { date: '', description: '', amount: '', file: null }];
- 
-  //   const total = newReceipts.reduce((sum, receipt) => {
-  //     const amount = parseFloat(receipt.amount);
-  //     return sum + (isNaN(amount) ? 0 : amount);
-  //   }, 0);
- 
-  //   setClaimData(prev => ({
-  //     ...prev,
-  //     receipts: newReceipts,
-  //     receiptCount: newReceipts.length,
-  //     totalAmount: total,
-  //   }));
-  //   setIsDirty(true);
-  // };
 
   const addReceipt = () => {
-  if (claimData.receipts.length >= 50) {
-    alert('You can only add up to 50 receipts.');
-    return;
-  }
-
-  const newReceipts = [
-    ...claimData.receipts,
-    {
-      date: '',
-      description: '',
-      amount: '',
-      files: [] // ✅ initialize this properly
+    if (claimData.receipts.length >= 50) {
+      alert('You can only add up to 50 receipts.');
+      return;
     }
-  ];
 
-  const total = newReceipts.reduce((sum, receipt) => {
-    const amount = parseFloat(receipt.amount);
-    return sum + (isNaN(amount) ? 0 : amount);
-  }, 0);
+    const newReceipts = [
+      ...claimData.receipts,
+      { date: '', description: '', amount: '', files: [] as File[] }
+    ];
 
-  setClaimData(prev => ({
-    ...prev,
-    receipts: newReceipts,
-    receiptCount: newReceipts.length,
-    totalAmount: total,
-  }));
-
-  setIsDirty(true);
-};
-
- 
-  const removeReceipt = (index: number) => {
-    const newReceipts = claimData.receipts.filter((_, i) => i !== index);
- 
     const total = newReceipts.reduce((sum, receipt) => {
       const amount = parseFloat(receipt.amount);
       return sum + (isNaN(amount) ? 0 : amount);
     }, 0);
- 
+
+    setClaimData(prev => ({
+      ...prev,
+      receipts: newReceipts,
+      receiptCount: newReceipts.length,
+      totalAmount: total,
+    }));
+    setIsDirty(true);
+  };
+
+  const removeReceipt = (index: number) => {
+    const newReceipts = claimData.receipts.filter((_, i) => i !== index);
+
+    const total = newReceipts.reduce((sum, receipt) => {
+      const amount = parseFloat(receipt.amount);
+      return sum + (isNaN(amount) ? 0 : amount);
+    }, 0);
+
     setClaimData(prev => ({
       ...prev,
       receipts: newReceipts,
@@ -216,15 +304,16 @@ export default function ClaimPage() {
     setDialogState('loading');
     setSubmitTimestamp(dayjs().format('YYYY-MM-DD HH:mm:ss'));
     console.log('Claim Data:', claimData);
+
     const isEmpty = (val: any) => val === null || val === '' || val === undefined;
- 
+
     const missingReceipts = claimData.receipts.some((receipt) => (
       isEmpty(receipt.date) ||
       isEmpty(receipt.amount) ||
       isEmpty(receipt.description) ||
-      !receipt.file
+      !receipt.files || receipt.files.length === 0
     ));
- 
+
     if (
       isEmpty(claimData.claimType) ||
       isEmpty(claimData.unit) ||
@@ -237,11 +326,12 @@ export default function ClaimPage() {
       setOpenDialog(false);
       return;
     }
- 
+
     try {
+      // 🔧 submitClaim stays as-is (your existing uploader / backend)
       const response = await submitClaim(claimData);
       console.log('Response from submitClaim:', response);
-     
+
       if (response.success) {
         setClaimData(prev => ({ ...prev, claimId: response.claimId }));
         setDialogState('success');
@@ -254,10 +344,10 @@ export default function ClaimPage() {
       setErrorMessage(error.message || 'An unexpected error occurred. Please try again or contact admin.');
       setDialogState('error');
     }
- 
+
     console.log('Submitting claim:', claimData);
     setOpen(false);
-  };  
+  };
 
   const resetDialog = () => {
     setOpenDialog(false);
@@ -267,75 +357,53 @@ export default function ClaimPage() {
       claimType: '',
       benefitType: '',
       unit: '',
-      fullName: userInfo?.fullName || '',
+      fullName: profile?.full_name || '',
       email: user.email,
-      phoneNumber: userInfo?.phoneNum || '',
-      icNum: userInfo?.icNum || '',
-      bankHolder: bankInfo?.bankHolder || '',
-      bankName: bankInfo?.bankName || '',
-      bankNum: bankInfo?.bankNum || '',
+      phoneNumber: profile?.phone_num || '',
+      icNum: profile?.ic_num || '',
+      bankHolder: profile?.bank_holder || '',
+      bankName: profile?.bank_name || '',
+      bankNum: profile?.bank_num || '',
       totalAmount: 0,
       receiptCount: 0,
-      // receipts: [{ date: '', description: '', amount: '', file: null }]
-      receipts: [{ date: '', description: '', amount: '', files: [] }]
+      receipts: [{ date: '', description: '', amount: '', files: [] as File[] }]
     });
     setIsDirty(false);
   };
- 
+
   const validateForm = () => {
     const requiredFields = ['unit', 'claimType', 'fullName', 'phoneNumber'];
-   
-    // Check if all required fields are filled
     for (const field of requiredFields) {
-      if (!claimData[field]) {
+      if (!(claimData as any)[field]) {
         alert(`${field.charAt(0).toUpperCase() + field.slice(1)} is required.`);
         return false;
       }
     }
- 
-    // Validate Receipts
     const missingReceiptFields = claimData.receipts.some((receipt) => (
-      !receipt.date || !receipt.amount || !receipt.description || !receipt.file
+      !receipt.date || !receipt.amount || !receipt.description || !receipt.files || receipt.files.length === 0
     ));
- 
     if (missingReceiptFields) {
       alert("Please fill out all receipt fields and upload a file for each receipt.");
       return false;
     }
- 
     return true;
   };
- 
-  const handleFormSubmit = (e) => {
-    e.preventDefault();
-    setDialogState('confirm'); // 进入确认状态
-    setOpenDialog(true);       // 打开弹窗
-  };
 
-  // const handleFileChange = (index: number, file: File) => {
-  //   const updatedReceipts = [...claimData.receipts];
-  //   updatedReceipts[index].file = file;
-  //   setClaimData(prev => ({
-  //     ...prev,
-  //     receipts: updatedReceipts,
-  //   }));
-  //   setIsDirty(true);
-  // };
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setDialogState('confirm');
+    setOpenDialog(true);
+  };
 
   const handleFileChange = (index: number, files: File[]) => {
-  const updatedReceipts = [...claimData.receipts];
-  updatedReceipts[index].files = files;
-  setClaimData(prev => ({
-    ...prev,
-    receipts: updatedReceipts
-  }));
-  setIsDirty(true);
-};
-
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
+    const updatedReceipts = [...claimData.receipts];
+    updatedReceipts[index].files = files;
+    setClaimData(prev => ({ ...prev, receipts: updatedReceipts }));
+    setIsDirty(true);
   };
+
+  const handleSnackbarClose = () => setSnackbarOpen(false);
 
   const handleOpenDialog = () => {
     setDialogState('confirm');
@@ -349,9 +417,10 @@ export default function ClaimPage() {
     resetDialog();
   };
 
-  const handleLeaveCancel = () => {
-    setShowLeaveDialog(false);
-  };
+  const handleLeaveCancel = () => setShowLeaveDialog(false);
+
+  // show loading while profile/uid resolves
+  if (loadingProfile || uid === null) return <LinearProgress />;
 
   return (
     <>
@@ -389,10 +458,11 @@ export default function ClaimPage() {
           </Typography>
         </CardContent>
       </Card>
+
       <Button variant="contained" onClick={handleOpen}>
         Submit Claim
       </Button>
-     
+
       <Dialog component="form" open={open} onClose={handleDialogClose} maxWidth="md" fullWidth onSubmit={handleFormSubmit}>
         <DialogTitle>Submit a New Claim</DialogTitle>
         <ClaimForm
@@ -414,6 +484,7 @@ export default function ClaimPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
       <ClaimDialog
         open={openDialog}
         state={dialogState}
@@ -426,19 +497,14 @@ export default function ClaimPage() {
         onConfirm={handleConfirmSubmit}
         onCloseSuccess={resetDialog}
       />
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-      >
+
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
         <Alert severity="warning">
           Are you sure you want to close the form? Unsaved changes will be lost.
         </Alert>
       </Snackbar>
-      <Dialog
-        open={showLeaveDialog}
-        onClose={handleLeaveCancel}
-      >
+
+      <Dialog open={showLeaveDialog} onClose={handleLeaveCancel}>
         <DialogTitle>Confirm Leave</DialogTitle>
         <DialogContent>
           <Typography>Are you sure you want to close? Your data will be lost.</Typography>
@@ -451,14 +517,3 @@ export default function ClaimPage() {
     </>
   );
 }
-
-
-
-
-
-
-
-
-
-
-

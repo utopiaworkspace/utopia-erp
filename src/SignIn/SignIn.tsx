@@ -11,13 +11,16 @@ import MuiCard from '@mui/material/Card';
 import ColorModeSelect from '../SharedTheme/ColorModeSelect';
 import { GoogleIcon, SitemarkIcon } from './components/CustomIcons';
 import { useSession, type Session } from '../SessionContext';
-import {
-  signInWithGoogle,
-  signInWithGithub,
-  signInWithCredentials,
-} from '../firebase/auth'; // Import your Google login function
-// import { useNavigate } from 'react-router-dom'; // Import useNavigate for routing
+// ❌ Commented out Firebase Auth
+// import {
+//   signInWithGoogle,
+//   signInWithGithub,
+//   signInWithCredentials,
+// } from '../firebase/auth';
 import { Navigate, useNavigate } from 'react-router';
+
+// ✅ Supabase auth import
+import { supabase } from "../supabase/supabaseClient";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -62,35 +65,26 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
 }));
 
 export default function SignIn(props: { disableCustomTheme?: boolean }) {
-  const navigate = useNavigate(); // Hook for navigation
-  const { session, setSession, loading } = useSession();
-  
+  const navigate = useNavigate();
+  const { session, setSession } = useSession();
+
   if (session) {
     return <Navigate to="/" />;
   }
 
   const handleLogin = async () => {
     try {
-      let result;
-      result = await signInWithGoogle();
-      const user = result.user;
-      // alert('Welcome, ' + user.displayName);
-      if (result?.success && result?.user) {
-        // Convert Firebase user to Session format
-        const userSession: Session = {
-          user: {
-            name: result.user.displayName || '',
-            email: result.user.email || '',
-            image: result.user.photoURL || '',
-          },
-        };
-        setSession(userSession);
-        // Redirect to the homepage after login
-        navigate('/dashboard/');
-        return {};
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+      });
+
+      if (error) {
+        console.error('Login error:', error);
+        return;
       }
 
-      
+      // Redirect will happen automatically
+      console.log('Redirecting to Google login...');
     } catch (error) {
       console.error('Login error:', error);
     }
@@ -102,8 +96,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       <SignInContainer>
         <ColorModeSelect sx={{ position: 'fixed', top: '1rem', right: '1rem' }} />
         <Card>
-          {/* Logo and Title; replce with your own logo */}
-          <SentimentSatisfiedIcon/>
+          <SentimentSatisfiedIcon />
           <Typography
             component="h1"
             variant="h4"

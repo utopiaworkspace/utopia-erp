@@ -1,0 +1,6 @@
+{
+  "compilerOptions": { "lib": ["deno.ns", "dom"] },
+  "imports": {
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+  }
+}

@@ -1,6 +1,9 @@
-// supabaseClient.ts
-import { createClient } from '@supabase/supabase-js';
+// Frontend Supabase client (safe for the browser)
+// DO NOT use the service role key here.
 
-const supabaseUrl = 'https://fxfxensvinkgmipaylrs.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ4ZnhlbnN2aW5rZ21pcGF5bHJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4OTQwMzUsImV4cCI6MjA3MDQ3MDAzNX0.jL72IRZmxDHi1lr4FeOE9Vsr8L1H1TOtOPMnEYUhQUw';
-export const supabase = createClient(supabaseUrl, supabaseKey);
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);

@@ -15,7 +15,8 @@ interface Receipt {
   description: string;
   amount: string;
   // file: File | null;
-  files: (File | null)[];
+  // files: (File | null)[];
+  files: File[];
 
 }
 
@@ -277,7 +278,7 @@ export default function ClaimForm({
               {receipt.files.length === 0
                 ? "Upload Receipt (Image or PDF) *Up to 6 files"
                 : "Add Another File"}
-              <input
+              {/* <input
                 accept="image/*,application/pdf"
                 capture="environment"
                 type="file"
@@ -285,6 +286,20 @@ export default function ClaimForm({
                 onChange={(e) => {
                   const newFile = e.target.files?.[0];
                   if (newFile) {
+                    const updatedFiles = [...receipt.files, newFile].slice(0, 6);
+                    onFileChange(index, updatedFiles);
+                    setIsDirty(true);
+                  }
+                }}
+              /> */}
+              <input
+                accept="image/*,application/pdf"
+                capture="environment"
+                type="file"
+                hidden
+                onChange={(e) => {
+                  const newFile = e.target.files?.[0];
+                  if (newFile instanceof File) {
                     const updatedFiles = [...receipt.files, newFile].slice(0, 6);
                     onFileChange(index, updatedFiles);
                     setIsDirty(true);
